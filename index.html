@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>超级内丹仙葫模拟器</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        button {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 10px;
+            padding: 10px;
+        }
+        #gold {
+            font-size: 20px;
+            font-weight: bold;
+            color: gold;
+            margin-right: 20px;
+        }
+        #result, #statistics, #value {
+            font-size: 20px;
+            margin: 10px auto;
+            padding: 10px;
+            border: 1px solid black;
+            width: 80%;
+            text-align: center;
+        }
+        #luck {
+            width: 100%;
+            height: 40px;
+            background-color: #222;
+            margin-top: 20px;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+        }
+        #luck-bar {
+            width: 0;
+            height: 100%;
+            background-color: #FFD700;
+            transition: width 0.5s;
+        }
+        #luck-text {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            line-height: 40px;
+            text-align: center;
+            font-weight: bold;
+            color: #222;
+            text-shadow: 0 0 10px #FFD700;
+        }
+        .saturated {
+            background-color: #FF4500 !important;
+            animation: blink 1s infinite;
+        }
+        @keyframes blink {
+            50% {
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>超级内丹仙葫模拟器</h1>
+    <button id="small-recharge">充小反</button>
+    <button id="large-recharge">充大反</button>
+    <span id="gold">金票：6996</span>
+    <button id="single">开一次</button>
+    <button id="ten">十连</button>
+    <div id="result"></div>
+    <div id="statistics"></div>
+    <div id="value"></div>
+    <button id="sell">贩卖</button>
+    <button id="reset">复位</button>
+    <div id="luck">
+        <div id="luck-bar"></div>
+        <div id="luck-text">欧气值</div>
+    </div>
+
+    <script>
+        const items = [
+            {name: '圣灵元丹■', price: 180, probability: 0.0003},
+            {name: '圣灵元丹●', price: 180, probability: 0.0003},
+            {name: '圣灵元丹▲', price: 180, probability: 0.0003},
+            {name: '圣灵元丹◆', price: 180, probability: 0.0003},
+            {name: '仙人的遗骨', price: 32, probability: 0.02},
+            {name: '遗失的法器', price: 3.5, probability: 0.03},
+            {name: '仙人的经验x5', price: 3.5, probability: 0.9488}
+        ];
+
+        let gold = 6996;
+        let count = 0;
+        let cost = 0;
+        let value = 0;
+        let statistics = {};
+        let luck = 0;
+        let saturated = false;
+        let luckyChance = 0.00001;
+
+        function updateDisplay() {
+            document.getElementById('gold').textContent = `金票：${gold.toFixed(1)}`;
+            document.getElementById('statistics').innerHTML = Object.entries(statistics).map(([name, count]) => `${name}：${count}`).join('<br>');
+            document.getElementById('value').innerHTML = `您累计开出价值<span style="color: red; font-weight: bold;">${value.toFixed(1)}</span>元的物品（N1现行物价）`;
+            document.getElementById('luck-bar').style.width = `${luck}%`;
+            if (saturated) {
+                document.getElementById('luck-bar').classList.add('saturated');
+            } else {
+                document.getElementById('luck-bar').classList.remove('saturated');
+            }
+        }
+
+        function openOnce() {
+            if (gold < 22.6) {
+                alert('赌海无涯，回头是岸');
+                return;
+            }
+            gold -= 22.6;
+            cost += 22.6;
+            count++;
+            luck++;
+
+            let rand = Math.random();
+            let cumulative = 0;
+            let result;
+            for (let item of items) {
+                let probability = item.probability;
+                if (saturated && ['圣灵元丹■', '圣灵元丹●', '圣灵元丹▲', '圣灵元丹◆'].includes(item.name)) {
+                    probability *= 2.5;
+                }
+                cumulative += probability;
+                if (rand < cumulative) {
+                    result = item;
+                    break;
+                }
+            }
+
+            if (!statistics[result.name]) {
+                statistics[result.name] = 0;
+            }
+            statistics[result.name]++;
+            value += result.price;
+
+            document.getElementById('result').innerHTML = result.name;
+            updateDisplay();
+
+            if (count % 100 === 0) {
+                if (statistics['仙人的经验x5'] > 90) {
+                    alert('古非洲掌管开经验の神');
+                }
+            }
+
+            if (luck >= 100) {
+                saturated = true;
+                luckyChance = 0.15;
+            }
+
+            if (saturated && ['圣灵元丹■', '圣灵元丹●', '圣灵元丹▲', '圣灵元丹◆'].includes(result.name)) {
+                saturated = false;
+                luck = 0;
+                luckyChance = 0.00001;
+            }
+
+            if (Math.random() < luckyChance) {
+                alert('欧皇庇佑，赏666金票');
+                gold += 666;
+                saturated = false;
+                luck = 0;
+                luckyChance = 0.00001;
+            }
+        }
+
+        function openTen() {
+            let results = [];
+            for (let i = 0; i < 10; i++) {
+                if (gold < 22.6) {
+                    alert('赌海无涯，回头是岸');
+                    break;
+                }
+                gold -= 22.6;
+                cost += 22.6;
+                count++;
+                luck++;
+
+                let rand = Math.random();
+                let cumulative = 0;
+                let result;
+                for (let item of items) {
+                    let probability = item.probability;
+                    if (saturated && ['圣灵元丹■', '圣灵元丹●', '圣灵元丹▲', '圣灵元丹◆'].includes(item.name)) {
+                        probability *= 2.5;
+                    }
+                    cumulative += probability;
+                    if (rand < cumulative) {
+                        result = item;
+                        break;
+                    }
+                }
+
+                if (!statistics[result.name]) {
+                    statistics[result.name] = 0;
+                }
+                statistics[result.name]++;
+                value += result.price;
+                results.push(result.name);
+
+                if (luck >= 100) {
+                    saturated = true;
+                    luckyChance = 0.15;
+                }
+
+                if (saturated && ['圣灵元丹■', '圣灵元丹●', '圣灵元丹▲', '圣灵元丹◆'].includes(result.name)) {
+                    saturated = false;
+                    luck = 0;
+                    luckyChance = 0.00001;
+                }
+
+                if (Math.random() < luckyChance) {
+                    alert('欧皇庇佑，赏666金票');
+                    gold += 666;
+                    saturated = false;
+                    luck = 0;
+                    luckyChance = 0.00001;
+                }
+            }
+
+            document.getElementById('result').innerHTML = results.join('<br>');
+            updateDisplay();
+
+            if (count % 100 === 0) {
+                if (statistics['仙人的经验x5'] > 90) {
+                    alert('古非洲掌管开经验の神');
+                }
+            }
+        }
+
+        function sell() {
+            gold += value;
+            value = 0;
+            statistics = {};
+            updateDisplay();
+        }
+
+        function reset() {
+            gold = 6996;
+            count = 0;
+            cost = 0;
+            value = 0;
+            statistics = {};
+            luck = 0;
+            saturated = false;
+            luckyChance = 0.00001;
+            document.getElementById('result').innerHTML = '';
+            updateDisplay();
+        }
+
+        function smallRecharge() {
+            if (value < 1600) {
+                alert('充值失败，请量力而行！');
+                return;
+            }
+            value -= 1600;
+            gold += 6996;
+            alert('充值成功，祝大人欧气连连！');
+            updateDisplay();
+        }
+
+        function largeRecharge() {
+            if (value < 5000) {
+                alert('充值失败，请量力而行！');
+                return;
+            }
+            value -= 5000;
+            gold += 25688;
+            alert('尊贵的大人，这是您的金票请笑纳！');
+            updateDisplay();
+        }
+
+        document.getElementById('single').addEventListener('click', openOnce);
+        document.getElementById('ten').addEventListener('click', openTen);
+        document.getElementById('sell').addEventListener('click', sell);
+        document.getElementById('reset').addEventListener('click', reset);
+        document.getElementById('small-recharge').addEventListener('click', smallRecharge);
+        document.getElementById('large-recharge').addEventListener('click', largeRecharge);
+    </script>
+</body>
+</html>
