@@ -10,10 +10,10 @@
         padding: 0;
     }
     button {
-        font-size: 16px; /* 更小的字体尺寸以适应移动屏幕 */
+        font-size: 16px; /* 定义字体大小 */
         font-weight: bold;
         margin: 10px;
-        padding: 12px 20px; /* 增加了填充使得在触摸屏上更易点击 */
+        padding: 12px 20px; /* 按钮的内边距 */
         background-color: #ffffff;
         border: 2px solid #bbbbbb;
         border-radius: 5px; /* 圆角边框 */
@@ -30,45 +30,23 @@
         text-shadow: 0 0 5px #FFD700;
         margin-right: 20px;
     }
-    #result {
-        font-size: 16px;
-        margin: 20px auto; /* 调整间距保证视觉舒适性 */
-        padding: 15px;
-        border: 1px solid #dddddd;
-        background-color: white;
-        width: 300px; /* 固定宽度 */
-        height: 180px; /* 调整高度以容纳10行文字 */
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        overflow: auto;
-    }
-    #statistics {
-        font-size: 16px;
+    #result, #statistics, #value {
+        font-size: 18px;
         margin: 20px auto;
         padding: 15px;
         border: 1px solid #dddddd;
         background-color: white;
         width: 300px;
-        height: 90px; /* 调整高度以容纳5行文字 */
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        overflow: auto;
-    }
-    #value {
-        font-size: 16px;
-        margin: 20px auto;
-        padding: 15px;
-        border: 1px solid #dddddd;
-        background-color: white;
-        width: 300px;
-        height: 36px; /* 调整高度以容纳2行文字 */
+        height: auto; /* 自适应内容高度 */
         box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         overflow: auto;
     }
     #luck {
-        width: 300px; /* 固定宽度以适应下方按钮 */
-        margin: 10px auto; /* 居中显示 */
+        width: 300px;
+        margin: 10px auto;
         background-color: #333;
         height: 40px;
-        position: relative; /* 添加定位以容纳文本 */
+        position: relative;
     }
     #luck-bar {
         width: 0;
@@ -96,9 +74,20 @@
             opacity: 0;
         }
     }
+    .button-group {
+        display: flex;
+        justify-content: space-between; /* 分开按钮组 */
+        flex-wrap: wrap;
+        margin: 0 10px; /* 添加一些外部边距 */
+    }
+    .button-column {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
     @media (max-width: 600px) {
         body {
-            font-size: 14px; /* 在小屏幕上减小字体大小 */
+            font-size: 14px;
         }
         button {
             font-size: 14px;
@@ -110,11 +99,14 @@
         #result, #statistics, #value {
             font-size: 16px;
             padding: 10px;
-            width: 95%; /* 在小屏幕上增加宽度占比 */
-            height: auto; /* 在小屏幕上高度自适应 */
+            width: 95%;
+            height: auto;
         }
         #luck {
-            width: 95%; /* 小屏幕上宽度适应 */
+            width: 95%;
+        }
+        .button-group {
+            justify-content: space-between;
         }
     }
 </style>
