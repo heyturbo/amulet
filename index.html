@@ -2,34 +2,45 @@
 <html lang="en">
 <style>
     body {
-        font-family: Arial, sans-serif;
+        font-family: 'Helvetica Neue', Arial, sans-serif;
         text-align: center;
+        color: #333;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
     }
     button {
-        font-size: 24px;
+        font-size: 16px; /* 更小的字体尺寸以适应移动屏幕 */
         font-weight: bold;
         margin: 10px;
-        padding: 15px; /* 更大的填充以适应触控 */
+        padding: 12px 20px; /* 增加了填充使得在触摸屏上更易点击 */
+        background-color: #ffffff;
+        border: 2px solid #bbbbbb;
+        border-radius: 5px; /* 圆角边框 */
+        transition: background-color 0.3s;
+    }
+    button:hover {
+        background-color: #e8e8e8;
     }
     #gold {
-        font-size: 20px;
-        font-weight: bold;
-        color: gold;
+        font-size: 18px;
+        color: #FFFF00/* 更柔和的金色调 */
         margin-right: 20px;
     }
     #result, #statistics, #value {
-        font-size: 20px;
+        font-size: 18px;
         margin: 10px auto;
         padding: 15px;
-        border: 1px solid black;
-        width: 80%;
-        max-width: 500px; /* 设置最大宽度以避免过宽 */
-        text-align: center;
+        border: 1px solid #dddddd;
+        background-color: white;
+        width: 90%; /* 适应屏幕宽度 */
+        max-width: 500px; /* 最大宽度限制 */
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1); /* 添加阴影效果 */
     }
     #luck {
         width: 100%;
-        height: 50px; /* 增加高度以适应触控 */
-        background-color: #222;
+        height: 40px;
+        background-color: #333;
         margin-top: 20px;
         position: fixed;
         bottom: 0;
@@ -46,11 +57,11 @@
         top: 0;
         left: 0;
         width: 100%;
-        line-height: 50px; /* 调整行高以匹配 #luck 的高度 */
+        line-height: 40px;
         text-align: center;
         font-weight: bold;
-        color: #222;
-        text-shadow: 0 0 10px #FFD700;
+        color: white;
+        text-shadow: 0 0 5px #FFD700;
     }
     .saturated {
         background-color: #FF4500 !important;
@@ -61,17 +72,21 @@
             opacity: 0;
         }
     }
-    /* 媒体查询针对较小的设备 */
     @media (max-width: 600px) {
-        body, button, #gold, #result, #statistics, #value {
-            font-size: 18px; /* 字体大小适当减小 */
+        body {
+            font-size: 14px; /* 在小屏幕上减小字体大小 */
         }
         button {
-            padding: 20px; /* 增大按钮的触控面积 */
+            font-size: 14px;
+            padding: 10px 18px;
+        }
+        #gold {
+            font-size: 16px;
         }
         #result, #statistics, #value {
-            padding: 20px;
-            margin: 20px auto;
+            font-size: 16px;
+            padding: 10px;
+            width: 95%; /* 在小屏幕上增加宽度占比 */
         }
     }
 </style>
@@ -141,7 +156,7 @@
             for (let item of items) {
                 let probability = item.probability;
                 if (saturated && ['圣灵元丹■', '圣灵元丹●', '圣灵元丹▲', '圣灵元丹◆'].includes(item.name)) {
-                    probability *= 2.5;
+                    probability *= 5;
                 }
                 cumulative += probability;
                 if (rand < cumulative) {
@@ -167,7 +182,7 @@
 
             if (luck >= 100) {
                 saturated = true;
-                luckyChance = 0.15;
+                luckyChance = 0.10;
             }
 
             if (saturated && ['圣灵元丹■', '圣灵元丹●', '圣灵元丹▲', '圣灵元丹◆'].includes(result.name)) {
@@ -203,7 +218,7 @@
                 for (let item of items) {
                     let probability = item.probability;
                     if (saturated && ['圣灵元丹■', '圣灵元丹●', '圣灵元丹▲', '圣灵元丹◆'].includes(item.name)) {
-                        probability *= 2.5;
+                        probability *= 5;
                     }
                     cumulative += probability;
                     if (rand < cumulative) {
@@ -221,7 +236,7 @@
 
                 if (luck >= 100) {
                     saturated = true;
-                    luckyChance = 0.0005;
+                    luckyChance = 0.1;
                 }
 
                 if (saturated && ['圣灵元丹■', '圣灵元丹●', '圣灵元丹▲', '圣灵元丹◆'].includes(result.name)) {
@@ -257,7 +272,7 @@
         }
 
         function reset() {
-            gold = 6996;
+            gold = 2260;
             count = 0;
             cost = 0;
             value = 0;
