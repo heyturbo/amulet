@@ -1,70 +1,80 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>超内模拟器白手起家版</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+    }
+    button {
+        font-size: 24px;
+        font-weight: bold;
+        margin: 10px;
+        padding: 15px; /* 更大的填充以适应触控 */
+    }
+    #gold {
+        font-size: 20px;
+        font-weight: bold;
+        color: gold;
+        margin-right: 20px;
+    }
+    #result, #statistics, #value {
+        font-size: 20px;
+        margin: 10px auto;
+        padding: 15px;
+        border: 1px solid black;
+        width: 80%;
+        max-width: 500px; /* 设置最大宽度以避免过宽 */
+        text-align: center;
+    }
+    #luck {
+        width: 100%;
+        height: 50px; /* 增加高度以适应触控 */
+        background-color: #222;
+        margin-top: 20px;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+    }
+    #luck-bar {
+        width: 0;
+        height: 100%;
+        background-color: #FFD700;
+        transition: width 0.5s;
+    }
+    #luck-text {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        line-height: 50px; /* 调整行高以匹配 #luck 的高度 */
+        text-align: center;
+        font-weight: bold;
+        color: #222;
+        text-shadow: 0 0 10px #FFD700;
+    }
+    .saturated {
+        background-color: #FF4500 !important;
+        animation: blink 1s infinite;
+    }
+    @keyframes blink {
+        50% {
+            opacity: 0;
+        }
+    }
+    /* 媒体查询针对较小的设备 */
+    @media (max-width: 600px) {
+        body, button, #gold, #result, #statistics, #value {
+            font-size: 18px; /* 字体大小适当减小 */
         }
         button {
-            font-size: 24px;
-            font-weight: bold;
-            margin: 10px;
-            padding: 10px;
-        }
-        #gold {
-            font-size: 20px;
-            font-weight: bold;
-            color: gold;
-            margin-right: 20px;
+            padding: 20px; /* 增大按钮的触控面积 */
         }
         #result, #statistics, #value {
-            font-size: 20px;
-            margin: 10px auto;
-            padding: 10px;
-            border: 1px solid black;
-            width: 80%;
-            text-align: center;
+            padding: 20px;
+            margin: 20px auto;
         }
-        #luck {
-            width: 100%;
-            height: 40px;
-            background-color: #222;
-            margin-top: 20px;
-            position: fixed;
-            bottom: 0;
-            left: 0;
-        }
-        #luck-bar {
-            width: 0;
-            height: 100%;
-            background-color: #FFD700;
-            transition: width 0.5s;
-        }
-        #luck-text {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            line-height: 40px;
-            text-align: center;
-            font-weight: bold;
-            color: #222;
-            text-shadow: 0 0 10px #FFD700;
-        }
-        .saturated {
-            background-color: #FF4500 !important;
-            animation: blink 1s infinite;
-        }
-        @keyframes blink {
-            50% {
-                opacity: 0;
-            }
-        }
-    </style>
+    }
+</style>
 </head>
 <body>
     <h1>超内模拟器白手起家版</h1>
