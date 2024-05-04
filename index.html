@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>超内模拟器开局送小反版</title>
+    <title>超内模拟器白手起家版</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -67,10 +67,10 @@
     </style>
 </head>
 <body>
-    <h1>超内模拟器开局送小反版</h1>
+    <h1>超内模拟器白手起家版</h1>
     <button id="small-recharge">充小反</button>
     <button id="large-recharge">充大反</button>
-    <span id="gold">金票：6996</span>
+    <span id="gold">金票：1130</span>
     <button id="single">开一次</button>
     <button id="ten">十连</button>
     <div id="result"></div>
@@ -94,7 +94,7 @@
             {name: '仙人的经验x5', price: 3.5, probability: 0.9488}
         ];
 
-        let gold = 6996;
+        let gold = 1130;
         let count = 0;
         let cost = 0;
         let value = 0;
@@ -211,7 +211,7 @@
 
                 if (luck >= 100) {
                     saturated = true;
-                    luckyChance = 0.05;
+                    luckyChance = 0.0005;
                 }
 
                 if (saturated && ['圣灵元丹■', '圣灵元丹●', '圣灵元丹▲', '圣灵元丹◆'].includes(result.name)) {
