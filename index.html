@@ -23,28 +23,52 @@
         background-color: #e8e8e8;
     }
     #gold {
-        font-size: 18px;
-        color: #FFFF00/* 更柔和的金色调 */
+        font-size: 20px;
+        color: #FFFF00; /* 更柔和的金色调 */
+        font-weight: bold;
+        color: white;
+        text-shadow: 0 0 5px #FFD700;
         margin-right: 20px;
     }
-    #result, #statistics, #value {
-        font-size: 18px;
-        margin: 10px auto;
+    #result {
+        font-size: 16px;
+        margin: 20px auto; /* 调整间距保证视觉舒适性 */
         padding: 15px;
         border: 1px solid #dddddd;
         background-color: white;
-        width: 90%; /* 适应屏幕宽度 */
-        max-width: 500px; /* 最大宽度限制 */
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1); /* 添加阴影效果 */
+        width: 300px; /* 固定宽度 */
+        height: 180px; /* 调整高度以容纳10行文字 */
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        overflow: auto;
+    }
+    #statistics {
+        font-size: 16px;
+        margin: 20px auto;
+        padding: 15px;
+        border: 1px solid #dddddd;
+        background-color: white;
+        width: 300px;
+        height: 90px; /* 调整高度以容纳5行文字 */
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        overflow: auto;
+    }
+    #value {
+        font-size: 16px;
+        margin: 20px auto;
+        padding: 15px;
+        border: 1px solid #dddddd;
+        background-color: white;
+        width: 300px;
+        height: 36px; /* 调整高度以容纳2行文字 */
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        overflow: auto;
     }
     #luck {
-        width: 100%;
-        height: 40px;
+        width: 300px; /* 固定宽度以适应下方按钮 */
+        margin: 10px auto; /* 居中显示 */
         background-color: #333;
-        margin-top: 20px;
-        position: fixed;
-        bottom: 0;
-        left: 0;
+        height: 40px;
+        position: relative; /* 添加定位以容纳文本 */
     }
     #luck-bar {
         width: 0;
@@ -87,6 +111,10 @@
             font-size: 16px;
             padding: 10px;
             width: 95%; /* 在小屏幕上增加宽度占比 */
+            height: auto; /* 在小屏幕上高度自适应 */
+        }
+        #luck {
+            width: 95%; /* 小屏幕上宽度适应 */
         }
     }
 </style>
