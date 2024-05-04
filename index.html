@@ -240,7 +240,7 @@
         }
 
         function sell() {
-            gold += value;
+            gold += 4 * value;
             value = 0;
             statistics = {};
             updateDisplay();
@@ -261,7 +261,7 @@
 
         function smallRecharge() {
             if (value < 1600) {
-                alert('充值失败，请量力而行！');
+                alert('充值失败，只有当你的货物价值足够支付小反费用（1600元）时，才可以成功充值！');
                 return;
             }
             value -= 1600;
@@ -272,7 +272,7 @@
 
         function largeRecharge() {
             if (value < 5000) {
-                alert('充值失败，请量力而行！');
+                alert('充值失败，请量力而行！只有当你的货物价值足够支付小反费用（5000元）时，才可以成功充值！');
                 return;
             }
             value -= 5000;
