@@ -136,7 +136,7 @@
             {name: '圣灵元丹◆', price: 180, probability: 0.0003},
             {name: '仙人的遗骨', price: 32, probability: 0.02},
             {name: '遗失的法器', price: 3.5, probability: 0.03},
-            {name: '仙人的经验x5', price: 3.5, probability: 0.9488}
+            {name: '仙人的经验*5', price: 3.5, probability: 0.9488}
         ];
 
         let gold = 2260;
@@ -176,7 +176,7 @@
             for (let item of items) {
                 let probability = item.probability;
                 if (saturated && ['圣灵元丹■', '圣灵元丹●', '圣灵元丹▲', '圣灵元丹◆'].includes(item.name)) {
-                    probability *= 5;
+                    probability *= 100;
                 }
                 cumulative += probability;
                 if (rand < cumulative) {
@@ -195,14 +195,14 @@
             updateDisplay();
 
             if (count % 100 === 0) {
-                if (statistics['仙人的经验x5'] > 90) {
+                if (statistics['仙人的经验*5'] > 90) {
                     alert('古非洲掌管开经验の神');
                 }
             }
 
             if (luck >= 100) {
                 saturated = true;
-                luckyChance = 0.10;
+                luckyChance = 0.05;
             }
 
             if (saturated && ['圣灵元丹■', '圣灵元丹●', '圣灵元丹▲', '圣灵元丹◆'].includes(result.name)) {
