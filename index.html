@@ -1,337 +1,202 @@
 <!DOCTYPE html>
-<html lang="en">
-<style>
-    body {
-        font-family: 'Helvetica Neue', Arial, sans-serif;
-        text-align: center;
-        color: #333;
-        background-color: #f4f4f4;
-        margin: 0;
-        padding: 0;
-    }
-    button {
-        font-size: 16px; /* 定义字体大小 */
-        font-weight: bold;
-        margin: 10px;
-        padding: 12px 20px; /* 按钮的内边距 */
-        background-color: #ffffff;
-        border: 2px solid #bbbbbb;
-        border-radius: 5px; /* 圆角边框 */
-        transition: background-color 0.3s;
-    }
-    button:hover {
-        background-color: #e8e8e8;
-    }
-    #gold {
-        font-size: 20px;
-        color: #FFFF00; /* 更柔和的金色调 */
-        font-weight: bold;
-        color: black;
-        text-shadow: 0 0 5px #FFD700;
-        margin-right: 20px;
-    }
-    #result, #statistics, #value {
-        font-size: 18px;
-        margin: 20px auto;
-        padding: 15px;
-        border: 1px solid #dddddd;
-        background-color: white;
-        width: 300px;
-        height: auto; /* 自适应内容高度 */
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        overflow: auto;
-    }
-    #luck {
-        width: 300px;
-        margin: 10px auto;
-        background-color: #333;
-        height: 40px;
-        position: relative;
-    }
-    #luck-bar {
-        width: 0;
-        height: 100%;
-        background-color: #FFD700;
-        transition: width 0.5s;
-    }
-    #luck-text {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        line-height: 40px;
-        text-align: center;
-        font-weight: bold;
-        color: white;
-        text-shadow: 0 0 5px #FFD700;
-    }
-    .saturated {
-        background-color: #FF4500 !important;
-        animation: blink 1s infinite;
-    }
-    @keyframes blink {
-        50% {
-            opacity: 0;
-        }
-    }
-    .button-group {
-        display: flex;
-        justify-content: space-between; /* 分开按钮组 */
-        flex-wrap: wrap;
-        margin: 0 10px; /* 添加一些外部边距 */
-    }
-    .button-column {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-    @media (max-width: 600px) {
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>結城夏奈 - Wikipedia</title>
+    <style>
         body {
-            font-size: 14px;
+            font-family: "Hiragino Kaku Gothic Pro", "メイリオ", sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background: #f6f6f6;
         }
-        button {
-            font-size: 14px;
-            padding: 10px 18px;
+        .wiki-header {
+            background: #f8f9fa;
+            border-bottom: 1px solid #a7d7f9;
+            padding: 0.5em 0;
         }
-        #gold {
-            font-size: 16px;
-        }
-        #result, #statistics, #value {
-            font-size: 16px;
+        .wiki-logo {
             padding: 10px;
-            width: 95%;
-            height: auto;
+            font-size: 14px;
+            color: #666;
         }
-        #luck {
-            width: 95%;
+        .content-wrapper {
+            max-width: 960px;
+            margin: 0 auto;
+            background: white;
+            padding: 1em 2em;
+            border: 1px solid #a7d7f9;
+            border-top: none;
         }
-        .button-group {
-            justify-content: space-between;
+        .article-title {
+            font-family: "Hiragino Mincho Pro", "ＭＳ Ｐ明朝", serif;
+            border-bottom: 1px solid #a2a9b1;
+            margin-bottom: 0.5em;
         }
-    }
-</style>
+        .infobox {
+            float: right;
+            margin: 0.5em 0 1em 1em;
+            border: 1px solid #a2a9b1;
+            background: #f8f9fa;
+            padding: 0.2em;
+            width: 22em;
+            font-size: 88%;
+        }
+        .infobox th {
+            vertical-align: top;
+            text-align: left;
+            padding: 0.2em;
+            background: #eaecf0;
+        }
+        .infobox td {
+            vertical-align: top;
+            padding: 0.2em;
+        }
+        .toc {
+            border: 1px solid #a2a9b1;
+            background: #f8f9fa;
+            padding: 0.5em;
+            margin: 1em 0;
+            display: table;
+        }
+        .section-heading {
+            border-bottom: 1px solid #a2a9b1;
+            margin-top: 1em;
+            font-weight: normal;
+        }
+        .reference {
+            font-size: 11px;
+            vertical-align: super;
+            line-height: 0;
+        }
+        .reference a {
+            color: #0645ad;
+        }
+    </style>
 </head>
 <body>
-    <h1>超内模拟器送百抽版</h1>
-    <button id="small-recharge">充小反</button>
-    <button id="large-recharge">充大反</button>
-    <span id="gold">金票：2260</span>
-    <button id="single">开一次</button>
-    <button id="ten">十连</button>
-    <div id="result"></div>
-    <div id="statistics"></div>
-    <div id="value"></div>
-    <button id="sell">换4比金票</button>
-    <button id="reset">复位</button>
-    <div id="luck">
-        <div id="luck-bar"></div>
-        <div id="luck-text">欧气值</div>
+    <div class="wiki-header">
+        <div class="content-wrapper wiki-logo">
+            Wikipedia（ウィキペディア）
+        </div>
     </div>
+    
+    <div class="content-wrapper">
+        <h1 class="article-title">結城夏奈</h1>
+        
+        <table class="infobox">
+            <tr>
+                <th colspan="2" style="text-align:center; background:#f0f0f0;">
+                    結城夏奈<br>
+                    ゆうき なつな<br>
+                    Yuuki Natsuna
+                </th>
+            </tr>
+            <tr>
+                <td colspan="2" style="text-align:center;">
+                    <img src="https://pic.imgdb.cn/item/6750008dd0e0a243d4dd1382.jpg" alt="結城夏奈 (2023年)" />
+                    <div>結城夏奈 (2023年)</div>
+                </td>
+            </tr>
+            <tr>
+                <th>本名</th>
+                <td>公表していない</td>
+            </tr>
+            <tr>
+                <th>生年月日</th>
+                <td>2001年7月23日（22歳）</td>
+            </tr>
+            <tr>
+                <th>出身地</th>
+                <td>日本・神奈川県横浜市</td>
+            </tr>
+            <tr>
+                <th>血液型</th>
+                <td>A型</td>
+            </tr>
+            <tr>
+                <th>身長</th>
+                <td>158 cm</td>
+            </tr>
+            <tr>
+                <th>職業</th>
+                <td>アイドル<br>女優<br>モデル</td>
+            </tr>
+            <tr>
+                <th>ジャンル</th>
+                <td>J-POP</td>
+            </tr>
+            <tr>
+                <th>活動期間</th>
+                <td>2016年 - 現在</td>
+            </tr>
+            <tr>
+                <th>レーベル</th>
+                <td>Starlight Records</td>
+            </tr>
+            <tr>
+                <th>事務所</th>
+                <td>スターライトプロダクション</td>
+            </tr>
+        </table>
 
-    <script>
-        const items = [
-            {name: '圣灵元丹■', price: 180, probability: 0.0003},
-            {name: '圣灵元丹●', price: 180, probability: 0.0003},
-            {name: '圣灵元丹▲', price: 180, probability: 0.0003},
-            {name: '圣灵元丹◆', price: 180, probability: 0.0003},
-            {name: '仙人的遗骨', price: 32, probability: 0.02},
-            {name: '遗失的法器', price: 3.5, probability: 0.03},
-            {name: '仙人的经验*5', price: 3.5, probability: 0.9488}
-        ];
+        <p><b>結城 夏奈</b>（ゆうき なつな、2001年7月23日 - ）は、日本のアイドル、女優、モデル。神奈川県横浜市出身。スターライトプロダクション所属。アイドルグループ「Starlight Girls」のメンバーとしても活動している。<sup class="reference"><a href="#ref_1">[1]</a></sup></p>
 
-        let gold = 2260;
-        let count = 0;
-        let cost = 0;
-        let value = 0;
-        let statistics = {};
-        let luck = 0;
-        let saturated = false;
-        let luckyChance = 0.00001;
+        <div class="toc">
+            <div style="font-weight:bold; margin-bottom:0.5em;">目次</div>
+            <ol>
+                <li><a href="#biography">来歴</a></li>
+                <li><a href="#career">芸能活動</a></li>
+                <li><a href="#personality">人物</a></li>
+                <li><a href="#works">作品</a></li>
+                <li><a href="#awards">受賞歴</a></li>
+            </ol>
+        </div>
 
-        function updateDisplay() {
-            document.getElementById('gold').textContent = `金票：${gold.toFixed(1)}`;
-            document.getElementById('statistics').innerHTML = Object.entries(statistics).map(([name, count]) => `${name}：${count}`).join('<br>');
-            document.getElementById('value').innerHTML = `您累计开出价值<span style="color: red; font-weight: bold;">${value.toFixed(1)}</span>元的物品（N1现行物价）`;
-            document.getElementById('luck-bar').style.width = `${luck}%`;
-            if (saturated) {
-                document.getElementById('luck-bar').classList.add('saturated');
-            } else {
-                document.getElementById('luck-bar').classList.remove('saturated');
-            }
-        }
+        <h2 id="biography" class="section-heading">来歴</h2>
+        <p>2001年、神奈川県横浜市に生まれる。幼少期からダンスを習い、小学6年生の時にスターライトプロダクションの育成オーディションに合格。中学1年生から芸能活動を開始した。2016年、アイドルグループ「Starlight Girls」の第2期メンバーとしてデビュー。<sup class="reference"><a href="#ref_2">[2]</a></sup></p>
 
-        function openOnce() {
-            if (gold < 22.6) {
-                alert('赌海无涯，回头是岸');
-                return;
-            }
-            gold -= 22.6;
-            cost += 22.6;
-            count++;
-            luck++;
+        <h2 id="career" class="section-heading">芸能活動</h2>
+        <p>2016年8月、「Starlight Girls」の新メンバーとしてお披露目。同年12月発売のシングル「青春マーチ！」で CDデビュー。2018年からはグループのサブリーダーを務める。2020年からはソロ活動も開始し、女優としてドラマや映画にも出演。2022年には初主演映画『夏空のメロディ』が公開され、新人女優賞を受賞。<sup class="reference"><a href="#ref_3">[3]</a></sup></p>
 
-            let rand = Math.random();
-            let cumulative = 0;
-            let result;
-            for (let item of items) {
-                let probability = item.probability;
-                if (saturated && ['圣灵元丹■', '圣灵元丹●', '圣灵元丹▲', '圣灵元丹◆'].includes(item.name)) {
-                    probability *= 100;
-                }
-                cumulative += probability;
-                if (rand < cumulative) {
-                    result = item;
-                    break;
-                }
-            }
+        <h2 id="personality" class="section-heading">人物</h2>
+        <p>特技はジャズダンスとピアノ。趣味は料理と写真撮影。グループ内では「なっちゃん」の愛称で親しまれている。明るく社交的な性格で、メンバーのムードメーカー的存在。ファンからは「アイドル界の癒し系お姉さん」と呼ばれている。<sup class="reference"><a href="#ref_4">[4]</a></sup></p>
 
-            if (!statistics[result.name]) {
-                statistics[result.name] = 0;
-            }
-            statistics[result.name]++;
-            value += result.price;
+        <h2 id="works" class="section-heading">作品</h2>
+        <h3>シングル</h3>
+        <ul>
+            <li>「青春マーチ！」(2016年12月)</li>
+            <li>「恋のシグナル」(2017年4月)</li>
+            <li>「SUMMER MAGIC」(2017年7月)</li>
+            <li>「Starlight☆Dream」(2018年1月)</li>
+        </ul>
 
-            document.getElementById('result').innerHTML = result.name;
-            updateDisplay();
+        <h3>主演ドラマ</h3>
+        <ul>
+            <li>『放課後のシンデレラ』（2021年、TBS系）</li>
+            <li>『コーヒーと恋の味』（2022年、フジテレビ系）</li>
+        </ul>
 
-            if (count % 100 === 0) {
-                if (statistics['仙人的经验*5'] > 90) {
-                    alert('古非洲掌管开经验の神');
-                }
-            }
+        <h3>映画</h3>
+        <ul>
+            <li>『夏空のメロディ』（2022年）主演</li>
+            <li>『あの日の約束』（2023年）準主演</li>
+        </ul>
 
-            if (luck >= 100) {
-                saturated = true;
-                luckyChance = 0.05;
-            }
+        <h2 id="awards" class="section-heading">受賞歴</h2>
+        <ul>
+            <li>第45回日本アカデミー賞 新人俳優賞（2023年）</li>
+            <li>第37回日本ゴールデングランプリ アイドル部門優秀賞（2022年）</li>
+        </ul>
 
-            if (saturated && ['圣灵元丹■', '圣灵元丹●', '圣灵元丹▲', '圣灵元丹◆'].includes(result.name)) {
-                saturated = false;
-                luck = 0;
-                luckyChance = 0.00001;
-            }
-
-            if (Math.random() < luckyChance) {
-                alert('欧皇庇佑，赏666金票');
-                gold += 666;
-                saturated = false;
-                luck = 0;
-                luckyChance = 0.00001;
-            }
-        }
-
-        function openTen() {
-            let results = [];
-            for (let i = 0; i < 10; i++) {
-                if (gold < 22.6) {
-                    alert('赌海无涯，回头是岸');
-                    break;
-                }
-                gold -= 22.6;
-                cost += 22.6;
-                count++;
-                luck++;
-
-                let rand = Math.random();
-                let cumulative = 0;
-                let result;
-                for (let item of items) {
-                    let probability = item.probability;
-                    if (saturated && ['圣灵元丹■', '圣灵元丹●', '圣灵元丹▲', '圣灵元丹◆'].includes(item.name)) {
-                        probability *= 5;
-                    }
-                    cumulative += probability;
-                    if (rand < cumulative) {
-                        result = item;
-                        break;
-                    }
-                }
-
-                if (!statistics[result.name]) {
-                    statistics[result.name] = 0;
-                }
-                statistics[result.name]++;
-                value += result.price;
-                results.push(result.name);
-
-                if (luck >= 100) {
-                    saturated = true;
-                    luckyChance = 0.1;
-                }
-
-                if (saturated && ['圣灵元丹■', '圣灵元丹●', '圣灵元丹▲', '圣灵元丹◆'].includes(result.name)) {
-                    saturated = false;
-                    luck = 0;
-                    luckyChance = 0.00001;
-                }
-
-                if (Math.random() < luckyChance) {
-                    alert('欧皇庇佑，赏666金票');
-                    gold += 666;
-                    saturated = false;
-                    luck = 0;
-                    luckyChance = 0.00001;
-                }
-            }
-
-            document.getElementById('result').innerHTML = results.join('<br>');
-            updateDisplay();
-
-            if (count % 100 === 0) {
-                if (statistics['仙人的经验x5'] > 90) {
-                    alert('古非洲掌管开经验の神');
-                }
-            }
-        }
-
-        function sell() {
-            gold += 4 * value;
-            value = 0;
-            statistics = {};
-            updateDisplay();
-        }
-
-        function reset() {
-            gold = 2260;
-            count = 0;
-            cost = 0;
-            value = 0;
-            statistics = {};
-            luck = 0;
-            saturated = false;
-            luckyChance = 0.00001;
-            document.getElementById('result').innerHTML = '';
-            updateDisplay();
-        }
-
-        function smallRecharge() {
-            if (value < 1600) {
-                alert('充值失败，只有当你的货物价值足够支付小反费用（1600元）时，才可以成功充值！');
-                return;
-            }
-            value -= 1600;
-            gold += 7000;
-            alert('充值成功，祝大人欧气连连！');
-            updateDisplay();
-        }
-
-        function largeRecharge() {
-            if (value < 5000) {
-                alert('充值失败，请量力而行！只有当你的货物价值足够支付大反费用（5000元）时，才可以成功充值！');
-                return;
-            }
-            value -= 5000;
-            gold += 25788;
-            alert('尊贵的SSSSSSSSSSSSVIP大人，这是您的金票请笑纳！');
-            updateDisplay();
-        }
-
-        document.getElementById('single').addEventListener('click', openOnce);
-        document.getElementById('ten').addEventListener('click', openTen);
-        document.getElementById('sell').addEventListener('click', sell);
-        document.getElementById('reset').addEventListener('click', reset);
-        document.getElementById('small-recharge').addEventListener('click', smallRecharge);
-        document.getElementById('large-recharge').addEventListener('click', largeRecharge);
-    </script>
+        <h2 class="section-heading">出典</h2>
+        <ol>
+            <li id="ref_1">「結城夏奈インタビュー」『アイドルマガジン』2023年8月号</li>
+            <li id="ref_2">「Starlight Girls 活動記録集2016-2023」スターライトプロダクション、2023年</li>
+            <li id="ref_3">「新世代アイドル名鑑2023」『月刊エンタメ』2023年5月号</li>
+            <li id="ref_4">「結城夏奈1st写真集『なつなの季節』」宝島社、2022年</li>
+        </ol>
+    </div>
 </body>
 </html>
