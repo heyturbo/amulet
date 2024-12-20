@@ -1,189 +1,165 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>小金（网红猫） - 维基百科，自由的百科全书</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thông báo chính thức - Bộ Thông tin và Truyền thông</title>
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            line-height: 1.6;
+        * {
             margin: 0;
             padding: 0;
-            background: #f6f6f6;
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, sans-serif;
         }
-        .wiki-header {
-            background: #f8f9fa;
-            border-bottom: 1px solid #a7d7f9;
-            padding: 0.5em 0;
+        
+        body {
+            background: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
         }
-        .wiki-logo {
-            padding: 10px;
-            font-size: 14px;
-            color: #666;
+
+        .header {
+            background: #C61017;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
-        .content-wrapper {
-            max-width: 960px;
+
+        .nav {
+            background: #AF0E14;
+            padding: 0.5rem;
+            display: flex;
+            justify-content: space-around;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .nav a {
+            color: white;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .main-content {
+            padding: 1rem;
+            max-width: 800px;
             margin: 0 auto;
             background: white;
-            padding: 1em 2em;
-            border: 1px solid #a7d7f9;
-            border-top: none;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
-        .article-title {
-            font-family: 'Linux Libertine', Georgia, Times, serif;
-            border-bottom: 1px solid #a2a9b1;
-            margin-bottom: 0.5em;
+
+        .article {
+            margin-bottom: 2rem;
         }
-        .infobox {
-            float: right;
-            margin: 0.5em 0 1em 1em;
-            border: 1px solid #a2a9b1;
-            background: #f8f9fa;
-            padding: 0.2em;
-            width: 22em;
-            font-size: 88%;
+
+        .article-header {
+            border-bottom: 2px solid #C61017;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
         }
-        .infobox th {
-            vertical-align: top;
-            text-align: left;
-            padding: 0.2em;
-            background: #eaecf0;
+
+        .date {
+            color: #666;
+            font-size: 0.9rem;
+            margin: 0.5rem 0;
         }
-        .infobox td {
-            vertical-align: top;
-            padding: 0.2em;
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin: 1rem 0;
         }
-        .infobox img {
-            width: 220px;
-            height: 220px;
-            object-fit: cover;
-            display: block;
-            margin: 0 auto;
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.3s;
         }
-        .toc {
-            border: 1px solid #a2a9b1;
-            background: #f8f9fa;
-            padding: 0.5em;
-            margin: 1em 0;
-            display: table;
+
+        .btn-primary {
+            background: #C61017;
+            color: white;
         }
-        .section-heading {
-            border-bottom: 1px solid #a2a9b1;
-            margin-top: 1em;
-            font-weight: normal;
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
         }
-        .reference {
-            font-size: 11px;
-            vertical-align: super;
-            line-height: 0;
+
+        .related-news {
+            background: #f9f9f9;
+            padding: 1rem;
+            margin-top: 2rem;
         }
-        .reference a {
-            color: #0645ad;
+
+        .related-news h3 {
+            color: #C61017;
+            margin-bottom: 1rem;
+        }
+
+        .related-news ul {
+            list-style: none;
+        }
+
+        .related-news li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .footer {
+            background: #333;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            font-size: 0.8rem;
+            margin-top: 2rem;
         }
     </style>
 </head>
 <body>
-    <div class="wiki-header">
-        <div class="content-wrapper wiki-logo">
-            维基百科，自由的百科全书
-        </div>
-    </div>
+    <header class="header">
+        <h1>BỘ THÔNG TIN VÀ TRUYỀN THÔNG</h1>
+    </header>
     
-    <div class="content-wrapper">
-        <h1 class="article-title">小金（网红猫）</h1>
-        
-        <table class="infobox">
-            <tr>
-                <th colspan="2" style="text-align:center; background:#f0f0f0;">
-                    小金<br>
-                    Little Jin
-                </th>
-            </tr>
-            <tr>
-                <td colspan="2" style="text-align:center;">
-                    <img src="https://pic.imgdb.cn/item/67500ad2d0e0a243d4dd17dd.jpg" alt="小金的标志性卧姿照片" />
-                    <div>小金的标志性卧姿照片（2023年）</div>
-                </td>
-            </tr>
-            <tr>
-                <th>品种</th>
-                <td>英国短毛猫（金渐层）</td>
-            </tr>
-            <tr>
-                <th>性别</th>
-                <td>雄性</td>
-            </tr>
-            <tr>
-                <th>出生</th>
-                <td>2020年5月15日</td>
-            </tr>
-            <tr>
-                <th>居住地</th>
-                <td>中国上海市</td>
-            </tr>
-            <tr>
-                <th>体重</th>
-                <td>5.8千克</td>
-            </tr>
-            <tr>
-                <th>毛色</th>
-                <td>金渐层（ny25）</td>
-            </tr>
-            <tr>
-                <th>主要平台</th>
-                <td>小红书<br>抖音<br>哔哩哔哩</td>
-            </tr>
-            <tr>
-                <th>粉丝数量</th>
-                <td>500万+（截至2024年）</td>
-            </tr>
-            <tr>
-                <th>代表作品</th>
-                <td>《小金的日常》系列短视频</td>
-            </tr>
-        </table>
+    <nav class="nav">
+        <a href="#home">Trang chủ</a>
+        <a href="#news">Tin tức</a>
+        <a href="#contact">Liên hệ</a>
+    </nav>
 
-        <p><b>小金</b>（2020年5月15日－），中国知名网红猫咪，英国短毛猫金渐层品种，因其独特的圆润体型和呆萌表情在社交媒体上走红。其视频内容主要以日常生活、美食试吃和互动游戏为主，深受年轻网民喜爱。<sup class="reference"><a href="#ref_1">[1]</a></sup></p>
+    <main class="main-content">
+        <article class="article">
+            <div class="article-header">
+                <h2>Đại sứ Kinh tế Thượng Hải thăm Việt Nam để mở rộng hợp tác đầu tư ASEAN</h2>
+                <div class="date">20/12/2024 | 09:30 GMT+7</div>
+            </div>
 
-        <div class="toc">
-            <div style="font-weight:bold; margin-bottom:0.5em;">目次</div>
-            <ol>
-                <li><a href="#life">生平</a></li>
-                <li><a href="#career">网红生涯</a></li>
-                <li><a href="#characteristics">特征与性格</a></li>
-                <li><a href="#influence">社会影响</a></li>
-                <li><a href="#works">代表作品</a></li>
-            </ol>
-        </div>
+            <p>Hà Nội - Trong khuôn khổ chương trình hợp tác kinh tế song phương Việt Nam - Trung Quốc, hai Đại sứ Kinh tế của Thành phố Thượng Hải là ông Zhang Chen và bà He Pan đã có chuyến thăm chính thức tại Việt Nam để thảo luận về việc mở rộng khu vực thương mại ASEAN.</p>
 
-        <h2 id="life" class="section-heading">生平</h2>
-        <p>小金出生于上海市一家专业猫舍，2020年7月被现主人收养。幼年期就展现出独特的性格特征，特别是对食物的热爱和标志性的"躺平式"睡姿。因其圆润的体型和独特的表情，主人开始在社交媒体上分享其日常生活片段，逐渐积累人气。<sup class="reference"><a href="#ref_2">[2]</a></sup></p>
+            <div class="action-buttons">
+                <button class="btn btn-primary" onclick="alert('Đang tải chi tiết...')">Xem chi tiết</button>
+                <button class="btn btn-secondary" onclick="alert('Đang chia sẻ...')">Chia sẻ</button>
+            </div>
 
-        <h2 id="career" class="section-heading">网红生涯</h2>
-        <p>2021年初，小金在小红书平台首次走红，其躺平睡觉的视频获得超百万点赞。同年在抖音和哔哩哔哩平台开设账号，粉丝数量迅速增长。2022年成为多个宠物品牌的代言猫咪，参与多个公益项目，倡导关爱流浪动物。2023年推出个人周边产品系列，包括抱枕、手机壳等。<sup class="reference"><a href="#ref_3">[3]</a></sup></p>
+            <section class="related-news">
+                <h3>Tin liên quan</h3>
+                <ul>
+                    <li>Thảo luận về các dự án đầu tư mới tại Khu vực thương mại ASEAN</li>
+                    <li>Ký kết biên bản ghi nhớ về hợp tác thương mại điện tử</li>
+                    <li>Hội nghị xúc tiến đầu tư Việt Nam - Thượng Hải 2024</li>
+                </ul>
+            </section>
+        </article>
+    </main>
 
-        <h2 id="characteristics" class="section-heading">特征与性格</h2>
-        <p>小金体重5.8千克，属于较为健硕的英短体型。特征是圆润的脸型和标志性的金渐层毛色。性格温顺亲人，特别喜欢躺平睡觉和吃零食。最受欢迎的行为包括"直立站立求零食"和"躺平装死"等。<sup class="reference"><a href="#ref_4">[4]</a></sup></p>
-
-        <h2 id="influence" class="section-heading">社会影响</h2>
-        <p>小金的走红带动了金渐层猫品种的普及，其参与的流浪动物救助项目帮助数百只流浪猫找到新家。2023年获得"年度最具影响力宠物红人"称号，其视频多次入选各平台年度热门内容。<sup class="reference"><a href="#ref_5">[5]</a></sup></p>
-
-        <h2 id="works" class="section-heading">代表作品</h2>
-        <ul>
-            <li>《小金的日常》短视频系列（2021-至今）</li>
-            <li>《小金的美食日记》美食测评系列（2022-至今）</li>
-            <li>《萌宠公益行》公益节目特邀嘉宾（2023）</li>
-            <li>《小金月历》年历写真集（2024）</li>
-        </ul>
-
-        <h2 class="section-heading">参考资料</h2>
-        <ol>
-            <li id="ref_1">《2023年度宠物红人榜》，新媒体观察，2023年12月</li>
-            <li id="ref_2">《网红猫咪小金的成长故事》，宠物生活周刊，2023年第8期</li>
-            <li id="ref_3">《从萌宠到IP：解析小金的商业价值》，新媒体商业评论，2023年10月</li>
-            <li id="ref_4">《小金：一只改变金渐层印象的网红猫》，宠物世界，2023年第6期</li>
-            <li id="ref_5">《2023年度最具影响力宠物红人专访》，新媒体周刊，2023年12月</li>
-        </ol>
-    </div>
+    <footer class="footer">
+        <p>© 2024 Bộ Thông tin và Truyền thông Việt Nam</p>
+        <p>Địa chỉ: 18 Nguyễn Du, Hai Bà Trưng, Hà Nội</p>
+    </footer>
 </body>
 </html>
