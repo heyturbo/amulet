@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>水符/火符收益计算器</title>
+    <title>水符/火符高级收益计算器</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <style>
         :root {
             --primary-color: #3b82f6;
             --secondary-color: #ef4444;
+            --tertiary-color: #8b5cf6;
             --border-color: #e5e7eb;
             --bg-light: #f9fafb;
             --bg-dark: #f3f4f6;
@@ -16,6 +17,12 @@
             --text-medium: #4b5563;
             --text-light: #6b7280;
             --shadow: rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.06) 0px 1px 2px 0px;
+            --fire-light: #fee2e2;
+            --fire-dark: #ef4444;
+            --water-light: #dbeafe;
+            --water-dark: #3b82f6;
+            --crit-light: #fef9c3;
+            --crit-dark: #ca8a04;
         }
         
         * {
@@ -37,7 +44,7 @@
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 15px 10px;
+            padding: 10px;
         }
         
         h1, h2, h3, h4 {
@@ -48,13 +55,13 @@
         h1 {
             font-size: 1.5rem;
             text-align: center;
-            margin: 15px 0;
+            margin: 10px 0;
             color: var(--text-dark);
         }
         
         h2 {
             font-size: 1.25rem;
-            margin-top: 20px;
+            margin-top: 15px;
         }
         
         h3 {
@@ -79,6 +86,10 @@
             grid-template-columns: 1fr;
         }
         
+        .grid-3 {
+            grid-template-columns: 1fr;
+        }
+        
         .grid-4 {
             grid-template-columns: 1fr 1fr;
         }
@@ -86,6 +97,10 @@
         @media (min-width: 768px) {
             .grid-2 {
                 grid-template-columns: 1fr 1fr;
+            }
+            
+            .grid-3 {
+                grid-template-columns: 1fr 1fr 1fr;
             }
             
             .grid-4 {
@@ -104,7 +119,7 @@
             color: var(--text-medium);
         }
         
-        input, select, textarea {
+        input, select {
             width: 100%;
             padding: 8px 12px;
             border: 1px solid var(--border-color);
@@ -113,9 +128,20 @@
             font-size: 14px;
         }
         
-        input:focus, select:focus, textarea:focus {
+        input:focus, select:focus {
             outline: none;
             border-color: var(--primary-color);
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+            margin-right: 8px;
         }
         
         .result-box {
@@ -144,19 +170,6 @@
             margin-top: 3px;
         }
         
-        .pattern-preview {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 5px;
-            margin-top: 8px;
-        }
-        
-        .pattern-item {
-            padding: 5px 8px;
-            border-radius: 4px;
-            font-size: 0.75rem;
-        }
-        
         .chart-container {
             position: relative;
             height: 250px;
@@ -164,12 +177,22 @@
         }
         
         .fire-color {
-            color: var(--secondary-color);
+            color: var(--fire-dark);
             font-weight: 500;
         }
         
         .water-color {
-            color: var(--primary-color);
+            color: var(--water-dark);
+            font-weight: 500;
+        }
+        
+        .mix-color {
+            color: var(--tertiary-color);
+            font-weight: 500;
+        }
+        
+        .crit-color {
+            color: var(--crit-dark);
             font-weight: 500;
         }
         
@@ -189,12 +212,15 @@
             display: flex;
             border-bottom: 1px solid var(--border-color);
             margin-bottom: 15px;
+            flex-wrap: wrap;
         }
         
         .tab {
             padding: 8px 15px;
             cursor: pointer;
             border-bottom: 2px solid transparent;
+            white-space: nowrap;
+            font-size: 0.875rem;
         }
         
         .tab.active {
@@ -247,6 +273,240 @@
             font-style: italic;
         }
         
+        /* 符价值滑块样式 */
+        .talisman-value-container {
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            background-color: var(--bg-light);
+        }
+        
+        .talisman-slider-container {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+        }
+        
+        .talisman-slider {
+            flex: 1;
+            height: 8px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: linear-gradient(to right, var(--water-dark), var(--fire-dark));
+            outline: none;
+            border-radius: 4px;
+        }
+        
+        .talisman-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: white;
+            border: 2px solid var(--tertiary-color);
+            cursor: pointer;
+        }
+        
+        .talisman-slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: white;
+            border: 2px solid var(--tertiary-color);
+            cursor: pointer;
+        }
+        
+        .talisman-values {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+        }
+        
+        .water-value, .fire-value {
+            display: flex;
+            align-items: center;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+        
+        .water-value {
+            background-color: var(--water-light);
+            color: var(--water-dark);
+        }
+        
+        .fire-value {
+            background-color: var(--fire-light);
+            color: var(--fire-dark);
+        }
+        
+        .talisman-effect {
+            margin-top: 10px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.875rem;
+        }
+        
+        .water-effect, .fire-effect {
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+        
+        .water-effect {
+            color: var(--water-dark);
+        }
+        
+        .fire-effect {
+            color: var(--fire-dark);
+        }
+        
+        /* 先后手切换按钮 */
+        .turn-switcher {
+            display: flex;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+        
+        .turn-btn {
+            flex: 1;
+            padding: 8px;
+            text-align: center;
+            cursor: pointer;
+            background-color: var(--bg-light);
+            transition: all 0.2s ease;
+            font-weight: 500;
+            font-size: 0.875rem;
+        }
+        
+        .turn-btn.active {
+            background-color: var(--tertiary-color);
+            color: white;
+        }
+        
+        .turn-btn:first-child {
+            border-right: 1px solid var(--border-color);
+        }
+        
+        /* 最优组合结果样式 */
+        .best-combo {
+            border: 2px solid var(--tertiary-color);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            background-color: #f5f0ff;
+        }
+        
+        .best-combo-title {
+            font-weight: 600;
+            color: var(--tertiary-color);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .best-combo-title span {
+            font-size: 0.875rem;
+            padding: 3px 8px;
+            background-color: var(--tertiary-color);
+            color: white;
+            border-radius: 4px;
+        }
+        
+        .combo-distribution {
+            display: flex;
+            margin: 10px 0;
+        }
+        
+        .combo-water, .combo-fire {
+            padding: 8px 12px;
+            border-radius: 4px;
+            text-align: center;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .combo-water {
+            background-color: var(--water-light);
+            color: var(--water-dark);
+            margin-right: 10px;
+        }
+        
+        .combo-fire {
+            background-color: var(--fire-light);
+            color: var(--fire-dark);
+        }
+        
+        .combo-effects {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.875rem;
+            margin-top: 10px;
+        }
+        
+        .stats-list {
+            margin-top: 10px;
+            font-size: 0.875rem;
+        }
+        
+        .stats-list div {
+            margin-bottom: 3px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .stats-list span:first-child {
+            color: var(--text-medium);
+        }
+        
+        .stats-list span:last-child {
+            font-weight: 500;
+        }
+        
+        /* 暴击参数区域样式 */
+        .crit-box {
+            background-color: var(--crit-light);
+            border: 1px solid var(--crit-dark);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .crit-box h3 {
+            color: var(--crit-dark);
+            margin-top: 0;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .crit-rate-display {
+            display: inline-block;
+            font-size: 0.875rem;
+            padding: 3px 8px;
+            background-color: var(--crit-dark);
+            color: white;
+            border-radius: 4px;
+        }
+        
+        .crit-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .crit-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
         @media (max-width: 480px) {
             .grid-4 {
                 grid-template-columns: 1fr;
@@ -268,12 +528,64 @@
 </head>
 <body>
     <div class="container">
-        <h1>水符/火符收益计算器</h1>
+        <h1>水符/火符高级收益计算器</h1>
         
         <!-- 模式切换 -->
         <div class="mode-switcher">
             <div class="mode-btn active" data-mode="monster">野怪模式</div>
             <div class="mode-btn" data-mode="pk">PK模式</div>
+        </div>
+        
+        <!-- 符价值分配 -->
+        <div class="card">
+            <h3>符价值分配</h3>
+            <div class="talisman-value-container">
+                <div class="talisman-values">
+                    <div class="water-value">水符: <span id="waterValue">10</span></div>
+                    <div class="fire-value">火符: <span id="fireValue">15</span></div>
+                </div>
+                <div class="talisman-slider-container">
+                    <input type="range" min="0" max="25" value="10" class="talisman-slider" id="talismanSlider">
+                </div>
+                <div class="talisman-effect">
+                    <div class="water-effect">再次释放概率: <span id="waterEffect">4%</span></div>
+                    <div class="fire-effect">伤害提升: <span id="fireEffect">7%</span></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 暴击参数 -->
+        <div class="crit-box">
+            <h3>暴击参数 <span class="crit-rate-display" id="critRateDisplay">暴击率: 50.0%</span></h3>
+            <div class="crit-grid">
+                <div class="form-group">
+                    <label for="critValue">暴击值:</label>
+                    <input type="number" id="critValue" min="0" value="500">
+                </div>
+                
+                <div class="form-group">
+                    <label for="critResistance">暴击抵抗值:</label>
+                    <input type="number" id="critResistance" min="0" value="0">
+                </div>
+                
+                <div class="form-group">
+                    <label for="playerLevel">玩家等级:</label>
+                    <input type="number" id="playerLevel" min="1" value="100">
+                </div>
+            </div>
+            
+            <div class="checkbox-group">
+                <input type="checkbox" id="physicalCrit">
+                <label for="physicalCrit">物理暴击 (暴击率上限80%)</label>
+            </div>
+            
+            <div class="form-group">
+                <label for="critDamage">暴击伤害倍率:</label>
+                <input type="number" id="critDamage" min="1.5" max="5" step="0.1" value="2.0">
+                <div class="damage-range">
+                    暴击时伤害乘以此倍率，通常为2.0
+                </div>
+            </div>
         </div>
         
         <!-- 控制面板 -->
@@ -302,39 +614,34 @@
                         <input type="text" id="enemyHP" value="15,000,000">
                     </div>
                     
-                    <!-- PK模式专用参数 -->
-                    <div id="pkModeParams" class="form-group" style="display: none;">
-                        <label for="damageReduction">减伤系数 (%):</label>
-                        <input type="number" id="damageReduction" min="0" max="90" step="1" value="50">
-                        <div class="damage-range">
-                            伤害波动范围: 0.9 ~ 1.1 (默认)
-                        </div>
+                    <!-- 先后手切换 -->
+                    <div class="turn-switcher">
+                        <div class="turn-btn active" data-turn="first">先手战斗</div>
+                        <div class="turn-btn" data-turn="second">后手战斗</div>
                     </div>
                 </div>
                 
-                <!-- 技能模式 -->
+                <!-- PK特有参数 -->
                 <div>
-                    <h3>技能伤害模式</h3>
+                    <h3>防御参数</h3>
                     <div class="form-group">
-                        <label for="patternSelect">预设模式:</label>
-                        <select id="patternSelect">
-                            <option value="均衡伤害">均衡伤害</option>
-                            <option value="前期高伤">前期高伤</option>
-                            <option value="后期高伤">后期高伤</option>
-                            <option value="波动伤害">波动伤害</option>
-                            <option value="极前期伤">极前期伤</option>
-                            <option value="自定义">自定义</option>
-                        </select>
+                        <label for="defenseValue">防御值:</label>
+                        <input type="number" id="defenseValue" min="0" max="100000" step="100" value="5000">
                     </div>
                     
-                    <div class="form-group">
-                        <label for="customPattern">自定义模式 (用逗号分隔系数):</label>
-                        <textarea id="customPattern" rows="3" placeholder="例如: 1.5, 1.2, 0.8, 0.5"></textarea>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="copperWall">
+                        <label for="copperWall">铜墙技能 (减伤增加50%)</label>
                     </div>
                     
                     <div class="result-box">
-                        <div class="result-label">当前模式预览:</div>
-                        <div id="patternPreview" class="pattern-preview"></div>
+                        <div class="result-label">当前减伤系数</div>
+                        <div id="damageReduction" class="result-value">15.7%</div>
+                        <div class="result-hint">基于防御值和技能计算</div>
+                    </div>
+                    
+                    <div class="damage-range">
+                        伤害波动范围: 0.9 ~ 1.1 (固定)
                     </div>
                 </div>
             </div>
@@ -342,7 +649,7 @@
         
         <!-- 计算结果 -->
         <div class="card">
-            <h3>计算结果</h3>
+            <h3>当前配置分析</h3>
             <div class="grid grid-4">
                 <div class="result-box">
                     <div class="result-label">临界血量</div>
@@ -359,13 +666,13 @@
                 <div class="result-box">
                     <div class="result-label">火符总收益</div>
                     <div id="fireBenefit" class="result-value">180,000</div>
-                    <div class="result-hint">敌人半血前20%伤害加成</div>
+                    <div class="result-hint">敌人半血前伤害加成</div>
                 </div>
                 
                 <div class="result-box">
                     <div class="result-label">水符总收益</div>
                     <div id="waterBenefit" class="result-value">450,000</div>
-                    <div class="result-hint">全程15%概率再次释放</div>
+                    <div class="result-hint">技能再次释放收益</div>
                 </div>
                 
                 <div class="result-box">
@@ -375,9 +682,63 @@
                 </div>
                 
                 <div class="result-box">
-                    <div class="result-label">推荐选择</div>
-                    <div id="bestChoice" class="result-value water-color">水符</div>
-                    <div id="comparisonResult" class="result-hint">选择水符更优</div>
+                    <div class="result-label">总体收益</div>
+                    <div id="totalBenefit" class="result-value">540,000</div>
+                    <div id="totalHint" class="result-hint">混合效果总收益</div>
+                </div>
+                
+                <div class="result-box">
+                    <div class="result-label">当前配置</div>
+                    <div id="currentConfig" class="result-value mix-color">混合搭配</div>
+                    <div id="configHint" class="result-hint">水15 + 火10</div>
+                </div>
+                
+                <div class="result-box">
+                    <div class="result-label">有效收益比</div>
+                    <div id="effectiveRatio" class="result-value">15.3%</div>
+                    <div class="result-hint">相比基础伤害的提升</div>
+                </div>
+            </div>
+            
+            <!-- 暴击影响分析 -->
+            <div class="result-box" style="margin-top: 15px;">
+                <div class="result-label">暴击影响分析</div>
+                <div class="grid grid-2" style="margin-top: 10px;">
+                    <div>
+                        <div class="stats-list">
+                            <div><span>预期暴击率:</span> <span id="expectedCritRate" class="crit-color">50.0%</span></div>
+                            <div><span>暴击伤害倍率:</span> <span id="critDamageMultiplier">2.0倍</span></div>
+                            <div><span>平均伤害系数:</span> <span id="avgDamageMultiplier">1.5倍</span></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="stats-list">
+                            <div><span>暴击对火符收益影响:</span> <span id="critFireImpact">+22.5%</span></div>
+                            <div><span>暴击对水符收益影响:</span> <span id="critWaterImpact">+22.5%</span></div>
+                            <div><span>优先推荐:</span> <span id="critRecommendation" class="mix-color">维持当前比例</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 最优组合结果 -->
+            <div class="best-combo">
+                <div class="best-combo-title">
+                    最优组合推荐 <span id="improvementRatio">+12.5%</span>
+                </div>
+                <div class="combo-distribution">
+                    <div class="combo-water" id="bestWater">水符: 5</div>
+                    <div class="combo-fire" id="bestFire">火符: 20</div>
+                </div>
+                <div class="combo-effects">
+                    <div class="water-effect">再次释放概率: <span id="bestWaterEffect">2%</span></div>
+                    <div class="fire-effect">伤害提升: <span id="bestFireEffect">12%</span></div>
+                </div>
+                <div class="stats-list">
+                    <div><span>总收益率:</span> <span id="bestTotalBenefitRatio">18.6%</span></div>
+                    <div><span>预期伤害提升:</span> <span id="bestDamageIncrease">720,000</span></div>
+                    <div><span>半血回合数:</span> <span id="bestHalfHpRound">3/10</span></div>
+                    <div><span>含暴击总收益:</span> <span id="bestTotalWithCrit" class="crit-color">27.9%</span></div>
                 </div>
             </div>
         </div>
@@ -385,26 +746,33 @@
         <!-- 图表分析 -->
         <div class="card">
             <div class="tab-container">
-                <div class="tab active" data-tab="hpChart">敌人血量影响</div>
-                <div class="tab" data-tab="attackChart">攻击力影响</div>
-                <div id="reductionTabItem" class="tab" data-tab="reductionChart" style="display: none;">减伤系数影响</div>
+                <div class="tab active" data-tab="distributionChart">符价值分配</div>
+                <div class="tab" data-tab="roundsChart">回合分析</div>
+                <div class="tab" data-tab="defenseChart">减伤影响</div>
+                <div class="tab" data-tab="critChart">暴击影响</div>
             </div>
             
-            <div id="hpChart" class="tab-content active">
+            <div id="distributionChart" class="tab-content active">
                 <div class="chart-container">
-                    <canvas id="hpChartCanvas"></canvas>
+                    <canvas id="distributionChartCanvas"></canvas>
                 </div>
             </div>
             
-            <div id="attackChart" class="tab-content">
+            <div id="roundsChart" class="tab-content">
                 <div class="chart-container">
-                    <canvas id="attackChartCanvas"></canvas>
+                    <canvas id="roundsChartCanvas"></canvas>
                 </div>
             </div>
             
-            <div id="reductionChart" class="tab-content">
+            <div id="defenseChart" class="tab-content">
                 <div class="chart-container">
-                    <canvas id="reductionChartCanvas"></canvas>
+                    <canvas id="defenseChartCanvas"></canvas>
+                </div>
+            </div>
+            
+            <div id="critChart" class="tab-content">
+                <div class="chart-container">
+                    <canvas id="critChartCanvas"></canvas>
                 </div>
             </div>
         </div>
@@ -414,21 +782,23 @@
             <h3>实用结论</h3>
             <div id="monsterConclusion">
                 <ul class="conclusion-list">
-                    <li><strong>临界值公式:</strong> 敌人血量 = 攻击力 × 技能系数 × 1.5 × 回合数</li>
-                    <li><strong>当敌人血量 &lt; 临界值时:</strong> 水符更优 (15%的持续收益)</li>
-                    <li><strong>当敌人血量 &gt; 临界值时:</strong> 火符更优 (敌人长时间保持在半血以上)</li>
-                    <li><strong>技能伤害分布影响:</strong> 前期高伤害分布更有利于火符，后期高伤害分布更有利于水符</li>
-                    <li><strong>实战选择:</strong> 对抗小怪群通常选择水符，对抗高血量BOSS通常选择火符</li>
+                    <li><strong>符价值分配:</strong> 根据战斗特点决定水火符的最佳分配</li>
+                    <li><strong>临界点影响:</strong> 攻击力越高、敌人血量越低，水符收益相对更高</li>
+                    <li><strong>先手影响:</strong> 先手时火符相对更强，因为能享受更多回合的增伤</li>
+                    <li><strong>减伤影响:</strong> 减伤越高，火符相对优势越大</li>
+                    <li><strong>暴击考量:</strong> 暴击率提高更有利于短期爆发，进一步增强火符在早期回合的效果</li>
+                    <li><strong>混搭策略:</strong> 通常不会极端分配，而是根据具体情况选择合适的混搭方案</li>
                 </ul>
             </div>
             
             <div id="pkConclusion" style="display: none;">
                 <ul class="conclusion-list">
-                    <li><strong>PK临界值公式:</strong> 敌人有效血量 = 实际血量 ÷ (1 - 减伤系数)</li>
-                    <li><strong>减伤系数影响:</strong> 减伤越高，火符优势越明显（敌人实际血量变厚）</li>
-                    <li><strong>战斗节奏:</strong> PK战斗中选择火符通常更优，因减伤效果延长了敌人半血之前的时间</li>
-                    <li><strong>波动伤害:</strong> 伤害波动会使战斗更加不可预测，整体收益比计算基于平均值</li>
-                    <li><strong>实战选择:</strong> 高减伤战斗选择火符，快速击杀战斗选择水符</li>
+                    <li><strong>PK减伤影响:</strong> 高防御带来的高减伤会使战斗持续更久，火符整体收益更高</li>
+                    <li><strong>铜墙效果:</strong> 铜墙进一步增加了有效血量，使火符的相对优势更明显</li>
+                    <li><strong>先后手重要性:</strong> PK中先手优势极大，影响火符的有效回合数</li>
+                    <li><strong>暴击重要性:</strong> PK中高暴击率能产生爆发力，配合火符前期增伤效果更佳</li>
+                    <li><strong>符价值配比:</strong> 短期PK推荐更偏向火符，长期PK考虑平衡搭配</li>
+                    <li><strong>真实波动影响:</strong> 实际战斗中伤害波动和暴击可能导致半血临界点提前或延后到来</li>
                 </ul>
             </div>
         </div>
@@ -442,229 +812,431 @@
             skillCoefficient: 1.0,
             totalRounds: 10,
             enemyHP: 15000000,
-            selectedPattern: "均衡伤害",
-            customPattern: "",
+            defenseValue: 5000,
+            copperWall: false,
+            
+            // 符价值
+            waterValue: 10,
+            fireValue: 15,
+            
+            // 暴击参数
+            critValue: 500,
+            critResistance: 0,
+            playerLevel: 100,
+            physicalCrit: false,
+            critDamage: 2.0, // 暴击伤害倍率，通常为2.0
             
             // 模式设置
             gameMode: "monster", // monster 或 pk
-            damageReduction: 50, // 百分比，默认50%
+            turnOrder: "first", // first 或 second
             damageRangeMin: 0.9,
             damageRangeMax: 1.1,
             
-            // 技能模式预设
-            skillPatterns: {
-                "均衡伤害": Array(10).fill(1.0),
-                "前期高伤": [1.5, 1.5, 1.5, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75],
-                "后期高伤": [0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 1.5, 1.5, 1.5],
-                "波动伤害": [1.1, 0.9, 1.1, 0.9, 1.0, 0.0, 1.1, 0.1, 0.9, 0.9],
-                "极前期伤": [2.0, 2.0, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
+            // 符效果表格
+            waterEffects: [0.02, 0.04, 0.06, 0.10, 0.15],
+            fireEffects: [0.02, 0.04, 0.07, 0.12, 0.20],
+            
+            // 获取当前水符等级
+            getWaterLevel() {
+                return Math.min(4, Math.floor(this.waterValue / 5));
             },
             
-            // 获取当前使用的技能模式
-            getCurrentPattern() {
-                if (this.selectedPattern === "自定义") {
-                    try {
-                        const parsed = this.customPattern.split(',').map(num => parseFloat(num.trim()));
-                        if (parsed.length > 0 && !parsed.some(isNaN)) {
-                            return parsed;
-                        }
-                    } catch (e) {
-                        return this.skillPatterns["均衡伤害"];
-                    }
+            // 获取当前火符等级
+            getFireLevel() {
+                return Math.min(4, Math.floor(this.fireValue / 5));
+            },
+            
+            // 获取当前水符效果
+            getWaterEffect() {
+                return this.waterEffects[this.getWaterLevel()];
+            },
+            
+            // 获取当前火符效果
+            getFireEffect() {
+                return this.fireEffects[this.getFireLevel()];
+            },
+            
+            // 计算暴击率
+            calculateCritRate() {
+                let critRate = (this.critValue - this.critResistance) / this.playerLevel / 100;
+                
+                // 限制暴击率上限
+                if (this.physicalCrit) {
+                    critRate = Math.min(0.8, Math.max(0, critRate)); // 物理暴击上限80%
+                } else {
+                    critRate = Math.min(1.0, Math.max(0, critRate)); // 其他暴击上限100%
                 }
-                return this.skillPatterns[this.selectedPattern] || this.skillPatterns["均衡伤害"];
+                
+                return critRate;
+            },
+            
+            // 计算暴击平均伤害倍率
+            calculateAvgCritMultiplier() {
+                const critRate = this.calculateCritRate();
+                // 平均伤害倍率 = 非暴击概率 * 1 + 暴击概率 * 暴击伤害倍率
+                return (1 - critRate) * 1 + critRate * this.critDamage;
+            },
+            
+            // 计算减伤系数
+            calculateDamageReduction() {
+                // 基础减伤 = (防御值/(25000+防御值))-0.1，下限为0
+                let reduction = Math.max(0, (this.defenseValue / (25000 + this.defenseValue)) - 0.1);
+                
+                // 铜墙效果：减伤*1.5
+                if (this.copperWall) {
+                    reduction = reduction * 1.5;
+                }
+                
+                return Math.min(0.9, reduction); // 最高限制90%减伤
             },
             
             // 获取实际有效血量（考虑减伤）
             getEffectiveHP() {
                 if (this.gameMode === "pk") {
+                    const damageReduction = this.calculateDamageReduction();
                     // 减伤影响：实际血量 / (1 - 减伤系数)
-                    return this.enemyHP / (1 - this.damageReduction / 100);
+                    return this.enemyHP / (1 - damageReduction);
                 }
                 return this.enemyHP;
             },
             
-            // 计算平均伤害（考虑波动）
+            // 计算平均伤害（考虑波动和暴击）
             getAverageDamage(baseDamage) {
+                // 计算波动后的平均伤害
+                const minDamage = baseDamage * this.damageRangeMin;
+                const maxDamage = baseDamage * this.damageRangeMax;
+                const avgWaveDamage = (minDamage + maxDamage) / 2;
+                
+                // 考虑暴击的平均伤害
+                const critMultiplier = this.calculateAvgCritMultiplier();
+                const avgDamage = avgWaveDamage * critMultiplier;
+                
                 if (this.gameMode === "pk") {
-                    // 计算波动后的平均伤害
-                    const minDamage = baseDamage * this.damageRangeMin;
-                    const maxDamage = baseDamage * this.damageRangeMax;
-                    const avgDamage = (minDamage + maxDamage) / 2;
-                    
+                    const damageReduction = this.calculateDamageReduction();
                     // 应用减伤
-                    return avgDamage * (1 - this.damageReduction / 100);
+                    return avgDamage * (1 - damageReduction);
                 }
-                return baseDamage;
+                return avgDamage;
             },
             
             // 计算临界血量
             calculateCriticalHP() {
                 const effectiveAttack = this.attackPower * this.skillCoefficient;
+                const effectiveDamage = this.getAverageDamage(effectiveAttack);
                 // 基础临界公式
-                let criticalHP = effectiveAttack * 1.5 * this.totalRounds;
-                
-                // PK模式需要考虑减伤
-                if (this.gameMode === "pk") {
-                    const effectiveDamage = this.getAverageDamage(effectiveAttack);
-                    criticalHP = effectiveDamage * 1.5 * this.totalRounds;
-                }
-                
-                return criticalHP;
+                return effectiveDamage * this.totalRounds * 1.5;
             },
             
             // 计算效益比
             calculateBenefitRatio() {
                 const effectiveAttack = this.attackPower * this.skillCoefficient;
-                const pattern = this.getCurrentPattern().slice(0, this.totalRounds);
+                const fireEffect = this.getFireEffect();
+                const waterEffect = this.getWaterEffect();
+                const critMultiplier = this.calculateAvgCritMultiplier();
                 
-                // 如果模式长度不足，填充到足够长度
-                while (pattern.length < this.totalRounds) {
-                    pattern.push(1.0);
+                // 基础伤害序列（考虑先后手、波动和暴击）
+                const baseDamages = [];
+                for (let i = 0; i < this.totalRounds; i++) {
+                    baseDamages.push(this.getAverageDamage(effectiveAttack));
                 }
-                
-                // 计算实际伤害序列（考虑减伤和波动）
-                const damages = pattern.map(p => {
-                    const baseDamage = effectiveAttack * p;
-                    return this.getAverageDamage(baseDamage);
-                });
                 
                 // 计算累积伤害和达到半血的回合
                 let cumulativeDamage = 0;
                 let halfHpRound = this.totalRounds;
                 const effectiveHP = this.getEffectiveHP();
                 
-                for (let i = 0; i < damages.length; i++) {
-                    cumulativeDamage += damages[i];
-                    if (cumulativeDamage >= effectiveHP / 2) {
+                // 如果后手，考虑敌人先攻击
+                let startingHP = effectiveHP;
+                if (this.turnOrder === "second" && this.gameMode === "pk") {
+                    // 敌人先攻，可能造成血量降低
+                    // 这里简化处理，假设对方也有类似伤害
+                    startingHP = effectiveHP * 0.85; // 假设敌人造成15%血量伤害
+                }
+                
+                // 计算半血回合
+                for (let i = 0; i < baseDamages.length; i++) {
+                    // 在敌人血量>50%时应用火符增益
+                    let roundDamage = baseDamages[i];
+                    if (cumulativeDamage < startingHP / 2) {
+                        roundDamage += baseDamages[i] * fireEffect; // 火符增伤
+                    }
+                    
+                    // 考虑水符额外攻击概率
+                    roundDamage += baseDamages[i] * waterEffect; // 水符额外伤害期望
+                    
+                    cumulativeDamage += roundDamage;
+                    if (cumulativeDamage >= startingHP / 2 && halfHpRound === this.totalRounds) {
                         halfHpRound = i + 1;
-                        break;
                     }
                 }
                 
-                // 计算火符和水符收益
-                const fireBenefit = 0.2 * damages.slice(0, halfHpRound).reduce((a, b) => a + b, 0);
-                const waterBenefit = 0.15 * damages.reduce((a, b) => a + b, 0);
+                // 计算火符和水符独立收益
+                let fireBenefit = 0;
+                let waterBenefit = 0;
+                
+                // 重置累积伤害计算独立收益
+                cumulativeDamage = 0;
+                
+                for (let i = 0; i < baseDamages.length; i++) {
+                    // 火符单独收益
+                    if (cumulativeDamage < startingHP / 2) {
+                        fireBenefit += baseDamages[i] * fireEffect;
+                    }
+                    
+                    // 水符单独收益
+                    waterBenefit += baseDamages[i] * waterEffect;
+                    
+                    // 更新累积伤害(只考虑基础伤害)
+                    cumulativeDamage += baseDamages[i];
+                }
+                
+                // 总收益
+                const totalBenefit = fireBenefit + waterBenefit;
                 const ratio = fireBenefit / waterBenefit;
+                
+                // 相对于总伤害的收益比
+                const totalBaseDamage = baseDamages.reduce((a, b) => a + b, 0);
+                const effectiveRatio = totalBenefit / totalBaseDamage;
+                
+                // 暴击对各符咒的影响
+                const normalDamage = this.attackPower * this.skillCoefficient * (this.damageRangeMin + this.damageRangeMax) / 2;
+                const withoutCritFactor = 1.0; // 不考虑暴击的基础系数
+                const withCritFactor = critMultiplier; // 考虑暴击的平均系数
+                
+                // 暴击对符咒收益的相对影响
+                const critImpact = (withCritFactor / withoutCritFactor - 1) * 100;
                 
                 return {
                     fireBenefit,
                     waterBenefit,
+                    totalBenefit,
                     ratio,
                     halfHpRound,
+                    effectiveRatio,
+                    critMultiplier,
+                    critImpact,
                     bestChoice: ratio > 1 ? "火符" : "水符"
                 };
             },
             
-            // 临界血量与当前敌人血量的比较结果
-            getCriticalComparison() {
-                const criticalHP = this.calculateCriticalHP();
+            // 寻找最优组合
+            findBestCombination() {
+                const originalWater = this.waterValue;
+                const originalFire = this.fireValue;
+                
+                let bestCombo = { waterValue: 0, fireValue: 25, benefit: 0 };
+                
+                // 尝试所有可能的分配方式
+                for (let waterValue = 0; waterValue <= 25; waterValue++) {
+                    const fireValue = 25 - waterValue;
+                    
+                    // 设置当前测试的价值分配
+                    this.waterValue = waterValue;
+                    this.fireValue = fireValue;
+                    
+                    // 计算这个分配的收益
+                    const result = this.calculateBenefitRatio();
+                    
+                    // 如果总收益更高，更新最优组合
+                    if (result.totalBenefit > bestCombo.benefit) {
+                        bestCombo = {
+                            waterValue,
+                            fireValue,
+                            benefit: result.totalBenefit,
+                            waterEffect: this.getWaterEffect(),
+                            fireEffect: this.getFireEffect(),
+                            halfHpRound: result.halfHpRound,
+                            effectiveRatio: result.effectiveRatio,
+                            critMultiplier: result.critMultiplier
+                        };
+                    }
+                }
+                
+                // 恢复原始值
+                this.waterValue = originalWater;
+                this.fireValue = originalFire;
+                
+                // 计算当前组合与最优组合的差异
+                const currentResult = this.calculateBenefitRatio();
+                const improvement = (bestCombo.benefit / currentResult.totalBenefit - 1) * 100;
+                
+                return {
+                    ...bestCombo,
+                    improvement: improvement
+                };
+            },
+            
+            // 生成符价值分配数据
+            generateDistributionData() {
+                const data = [];
+                const originalWater = this.waterValue;
+                const originalFire = this.fireValue;
+                
+                for (let waterValue = 0; waterValue <= 25; waterValue++) {
+                    const fireValue = 25 - waterValue;
+                    
+                    // 设置当前测试的价值分配
+                    this.waterValue = waterValue;
+                    this.fireValue = fireValue;
+                    
+                    // 计算这个分配的收益
+                    const result = this.calculateBenefitRatio();
+                    
+                    data.push({
+                        waterValue,
+                        fireValue,
+                        totalBenefit: result.totalBenefit,
+                        effectiveRatio: result.effectiveRatio * 100
+                    });
+                }
+                
+                // 恢复原始值
+                this.waterValue = originalWater;
+                this.fireValue = originalFire;
+                
+                return data;
+            },
+            
+            // 生成回合分析数据
+            generateRoundsData() {
+                const data = [];
+                const effectiveAttack = this.attackPower * this.skillCoefficient;
+                const fireEffect = this.getFireEffect();
+                const waterEffect = this.getWaterEffect();
+                
+                // 基础伤害序列（考虑先后手和波动）
+                const baseDamages = [];
+                for (let i = 0; i < this.totalRounds; i++) {
+                    baseDamages.push(this.getAverageDamage(effectiveAttack));
+                }
+                
+                // 计算累积伤害和达到半血的回合
+                let cumulativeDamage = 0;
                 const effectiveHP = this.getEffectiveHP();
                 
-                if (Math.abs(effectiveHP - criticalHP) / criticalHP < 0.05) {
-                    return "接近临界值";
+                // 如果后手，考虑敌人先攻击
+                let startingHP = effectiveHP;
+                if (this.turnOrder === "second" && this.gameMode === "pk") {
+                    startingHP = effectiveHP * 0.85; // 假设敌人造成15%血量伤害
                 }
-                return effectiveHP > criticalHP ? "选择火符更优" : "选择水符更优";
-            },
-            
-            // 生成基于血量的收益比数据
-            generateHpBasedData() {
-                const effectiveAttack = this.attackPower * this.skillCoefficient;
-                const data = [];
                 
-                // 生成从敌人血量20%到200%的范围
-                const baseHP = this.enemyHP;
-                const minHP = baseHP * 0.2;
-                const maxHP = baseHP * 2;
-                const steps = 40;
-                const step = (maxHP - minHP) / steps;
-                
-                for (let i = 0; i <= steps; i++) {
-                    const hp = minHP + i * step;
-                    // 暂存当前血量
-                    const originalHP = this.enemyHP;
-                    // 设置新血量进行计算
-                    this.enemyHP = hp;
+                for (let i = 0; i < baseDamages.length; i++) {
+                    // 在敌人血量>50%时应用火符增益
+                    let roundDamage = baseDamages[i];
+                    let fireBenefit = 0;
+                    if (cumulativeDamage < startingHP / 2) {
+                        fireBenefit = baseDamages[i] * fireEffect;
+                        roundDamage += fireBenefit;
+                    }
                     
-                    // 使用当前选择的技能模式计算
-                    const results = this.calculateBenefitRatio();
+                    // 考虑水符额外攻击概率
+                    const waterBenefit = baseDamages[i] * waterEffect;
+                    roundDamage += waterBenefit;
                     
-                    // 恢复原血量
-                    this.enemyHP = originalHP;
+                    // 总计累积伤害
+                    const previousDamage = cumulativeDamage;
+                    cumulativeDamage += roundDamage;
                     
                     data.push({
-                        hp: hp,
-                        hpMillions: (hp / 1000000).toFixed(2),
-                        benefitRatio: results.ratio,
-                        bestChoice: results.bestChoice
+                        round: i + 1,
+                        baseDamage: baseDamages[i],
+                        fireBenefit,
+                        waterBenefit,
+                        totalDamage: roundDamage,
+                        cumulativeDamage,
+                        remainingHPPercent: Math.max(0, (startingHP - cumulativeDamage) / startingHP) * 100,
+                        halfHPReached: previousDamage < startingHP / 2 && cumulativeDamage >= startingHP / 2
                     });
                 }
                 
                 return data;
             },
             
-            // 生成基于攻击力的收益比数据
-            generateAttackBasedData() {
-                const data = [];
-                const baseAttack = this.attackPower;
-                const minAttack = baseAttack * 0.2;
-                const maxAttack = baseAttack * 2;
-                const steps = 40;
-                const step = (maxAttack - minAttack) / steps;
-                
-                for (let i = 0; i <= steps; i++) {
-                    const atk = minAttack + i * step;
-                    // 暂存当前攻击力
-                    const originalAttack = this.attackPower;
-                    // 设置新攻击力进行计算
-                    this.attackPower = atk;
-                    
-                    // 计算新结果
-                    const results = this.calculateBenefitRatio();
-                    
-                    // 恢复原攻击力
-                    this.attackPower = originalAttack;
-                    
-                    data.push({
-                        attack: atk,
-                        attackK: (atk / 10000).toFixed(1),
-                        benefitRatio: results.ratio,
-                        bestChoice: results.bestChoice
-                    });
-                }
-                
-                return data;
-            },
-            
-            // 生成基于减伤系数的收益比数据（仅PK模式）
-            generateReductionBasedData() {
+            // 生成基于防御值的收益比数据
+            generateDefenseData() {
                 if (this.gameMode !== "pk") return [];
                 
                 const data = [];
-                const minReduction = 0;
-                const maxReduction = 90;
-                const steps = 40;
-                const step = (maxReduction - minReduction) / steps;
+                const originalDefense = this.defenseValue;
+                const originalCopperWall = this.copperWall;
                 
-                for (let i = 0; i <= steps; i++) {
-                    const reduction = minReduction + i * step;
-                    // 暂存当前减伤
-                    const originalReduction = this.damageReduction;
-                    // 设置新减伤进行计算
-                    this.damageReduction = reduction;
-                    
-                    // 计算新结果
-                    const results = this.calculateBenefitRatio();
-                    
-                    // 恢复原减伤
-                    this.damageReduction = originalReduction;
+                // 测试没有铜墙的情况
+                this.copperWall = false;
+                
+                const defenseValues = [0, 1000, 2500, 5000, 7500, 10000, 15000, 20000, 30000, 40000, 50000];
+                
+                for (const defense of defenseValues) {
+                    this.defenseValue = defense;
+                    const reduction = this.calculateDamageReduction();
+                    const result = this.calculateBenefitRatio();
                     
                     data.push({
-                        reduction: reduction,
-                        benefitRatio: results.ratio,
-                        bestChoice: results.bestChoice
+                        defense,
+                        reduction: reduction * 100,
+                        ratio: result.ratio,
+                        effectiveRatio: result.effectiveRatio * 100,
+                        withCopperWall: false
                     });
                 }
+                
+                // 测试有铜墙的情况
+                this.copperWall = true;
+                
+                for (const defense of defenseValues) {
+                    this.defenseValue = defense;
+                    const reduction = this.calculateDamageReduction();
+                    const result = this.calculateBenefitRatio();
+                    
+                    data.push({
+                        defense,
+                        reduction: reduction * 100,
+                        ratio: result.ratio,
+                        effectiveRatio: result.effectiveRatio * 100,
+                        withCopperWall: true
+                    });
+                }
+                
+                // 恢复原始值
+                this.defenseValue = originalDefense;
+                this.copperWall = originalCopperWall;
+                
+                return data;
+            },
+            
+            // 生成基于暴击率的收益比数据
+            generateCritRateData() {
+                const data = [];
+                
+                // 保存原始暴击参数
+                const originalCritValue = this.critValue;
+                const originalCritResistance = this.critResistance;
+                
+                // 测试不同暴击值
+                const critValues = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000];
+                
+                for (const critValue of critValues) {
+                    this.critValue = critValue;
+                    const critRate = this.calculateCritRate();
+                    const critMultiplier = this.calculateAvgCritMultiplier();
+                    const result = this.calculateBenefitRatio();
+                    
+                    // 计算理想的水火符分配
+                    let bestWaterFire = this.findBestCombination();
+                    
+                    data.push({
+                        critValue,
+                        critRate: critRate * 100,
+                        fireRatio: result.fireBenefit / (result.fireBenefit + result.waterBenefit) * 100,
+                        waterRatio: result.waterBenefit / (result.fireBenefit + result.waterBenefit) * 100,
+                        effectiveRatio: result.effectiveRatio * 100,
+                        bestWater: bestWaterFire.waterValue,
+                        bestFire: bestWaterFire.fireValue
+                    });
+                }
+                
+                // 恢复原始值
+                this.critValue = originalCritValue;
+                this.critResistance = originalCritResistance;
                 
                 return data;
             },
@@ -676,13 +1248,15 @@
                 if (mode === "pk") {
                     // 切换到PK模式的默认值
                     this.enemyHP = 1000000; // 100万
-                    this.damageReduction = 50; // 50%
-                    this.selectedPattern = "波动伤害"; // 波动伤害模式
                 } else {
                     // 切换回野怪模式的默认值
                     this.enemyHP = 15000000; // 1500万
-                    // 保持当前的模式和其他设置
                 }
+            },
+            
+            // 切换先后手
+            switchTurnOrder(turn) {
+                this.turnOrder = turn;
             }
         };
         
@@ -698,23 +1272,45 @@
             bindElements() {
                 // 模式切换按钮
                 this.modeBtns = document.querySelectorAll('.mode-btn');
+                this.turnBtns = document.querySelectorAll('.turn-btn');
+                
+                // 符价值元素
+                this.talismanSlider = document.getElementById('talismanSlider');
+                this.waterValueOutput = document.getElementById('waterValue');
+                this.fireValueOutput = document.getElementById('fireValue');
+                this.waterEffectOutput = document.getElementById('waterEffect');
+                this.fireEffectOutput = document.getElementById('fireEffect');
+                
+                // 暴击参数元素
+                this.critValueInput = document.getElementById('critValue');
+                this.critResistanceInput = document.getElementById('critResistance');
+                this.playerLevelInput = document.getElementById('playerLevel');
+                this.physicalCritCheckbox = document.getElementById('physicalCrit');
+                this.critDamageInput = document.getElementById('critDamage');
+                this.critRateDisplay = document.getElementById('critRateDisplay');
+                
+                // 暴击分析元素
+                this.expectedCritRate = document.getElementById('expectedCritRate');
+                this.critDamageMultiplier = document.getElementById('critDamageMultiplier');
+                this.avgDamageMultiplier = document.getElementById('avgDamageMultiplier');
+                this.critFireImpact = document.getElementById('critFireImpact');
+                this.critWaterImpact = document.getElementById('critWaterImpact');
+                this.critRecommendation = document.getElementById('critRecommendation');
                 
                 // 输入元素
                 this.attackPowerInput = document.getElementById('attackPower');
                 this.skillCoefficientInput = document.getElementById('skillCoefficient');
                 this.totalRoundsInput = document.getElementById('totalRounds');
                 this.enemyHPInput = document.getElementById('enemyHP');
-                this.damageReductionInput = document.getElementById('damageReduction');
-                this.pkModeParams = document.getElementById('pkModeParams');
-                this.patternSelect = document.getElementById('patternSelect');
-                this.customPatternInput = document.getElementById('customPattern');
+                this.defenseValueInput = document.getElementById('defenseValue');
+                this.copperWallCheckbox = document.getElementById('copperWall');
+                this.damageReductionOutput = document.getElementById('damageReduction');
                 
                 // 结论显示
                 this.monsterConclusion = document.getElementById('monsterConclusion');
                 this.pkConclusion = document.getElementById('pkConclusion');
                 
-                // 输出元素
-                this.patternPreview = document.getElementById('patternPreview');
+                // 计算结果元素
                 this.criticalHPOutput = document.getElementById('criticalHP');
                 this.criticalHPMillionsOutput = document.getElementById('criticalHPMillions');
                 this.halfHpRoundOutput = document.getElementById('halfHpRound');
@@ -722,14 +1318,28 @@
                 this.waterBenefitOutput = document.getElementById('waterBenefit');
                 this.benefitRatioOutput = document.getElementById('benefitRatio');
                 this.ratioHintOutput = document.getElementById('ratioHint');
-                this.bestChoiceOutput = document.getElementById('bestChoice');
-                this.comparisonResultOutput = document.getElementById('comparisonResult');
+                this.totalBenefitOutput = document.getElementById('totalBenefit');
+                this.totalHintOutput = document.getElementById('totalHint');
+                this.currentConfigOutput = document.getElementById('currentConfig');
+                this.configHintOutput = document.getElementById('configHint');
+                this.effectiveRatioOutput = document.getElementById('effectiveRatio');
+                
+                // 最优组合元素
+                this.improvementRatioOutput = document.getElementById('improvementRatio');
+                this.bestWaterOutput = document.getElementById('bestWater');
+                this.bestFireOutput = document.getElementById('bestFire');
+                this.bestWaterEffectOutput = document.getElementById('bestWaterEffect');
+                this.bestFireEffectOutput = document.getElementById('bestFireEffect');
+                this.bestTotalBenefitRatioOutput = document.getElementById('bestTotalBenefitRatio');
+                this.bestDamageIncreaseOutput = document.getElementById('bestDamageIncrease');
+                this.bestHalfHpRoundOutput = document.getElementById('bestHalfHpRound');
+                this.bestTotalWithCrit = document.getElementById('bestTotalWithCrit');
                 
                 // 图表
-                this.hpChartCanvas = document.getElementById('hpChartCanvas');
-                this.attackChartCanvas = document.getElementById('attackChartCanvas');
-                this.reductionChartCanvas = document.getElementById('reductionChartCanvas');
-                this.reductionTabItem = document.getElementById('reductionTabItem');
+                this.distributionChartCanvas = document.getElementById('distributionChartCanvas');
+                this.roundsChartCanvas = document.getElementById('roundsChartCanvas');
+                this.defenseChartCanvas = document.getElementById('defenseChartCanvas');
+                this.critChartCanvas = document.getElementById('critChartCanvas');
                 
                 // 标签页
                 this.tabs = document.querySelectorAll('.tab');
@@ -742,14 +1352,28 @@
                     btn.addEventListener('click', this.handleModeChange.bind(this));
                 });
                 
+                // 先后手切换事件
+                this.turnBtns.forEach(btn => {
+                    btn.addEventListener('click', this.handleTurnChange.bind(this));
+                });
+                
+                // 符价值滑块事件
+                this.talismanSlider.addEventListener('input', this.handleTalismanSliderChange.bind(this));
+                
+                // 暴击参数事件
+                this.critValueInput.addEventListener('input', this.handleCritValueChange.bind(this));
+                this.critResistanceInput.addEventListener('input', this.handleCritResistanceChange.bind(this));
+                this.playerLevelInput.addEventListener('input', this.handlePlayerLevelChange.bind(this));
+                this.physicalCritCheckbox.addEventListener('change', this.handlePhysicalCritChange.bind(this));
+                this.critDamageInput.addEventListener('input', this.handleCritDamageChange.bind(this));
+                
                 // 输入事件
                 this.attackPowerInput.addEventListener('input', this.handleAttackPowerChange.bind(this));
                 this.skillCoefficientInput.addEventListener('input', this.handleSkillCoefficientChange.bind(this));
                 this.totalRoundsInput.addEventListener('input', this.handleTotalRoundsChange.bind(this));
                 this.enemyHPInput.addEventListener('input', this.handleEnemyHPChange.bind(this));
-                this.damageReductionInput.addEventListener('input', this.handleDamageReductionChange.bind(this));
-                this.patternSelect.addEventListener('change', this.handlePatternSelectChange.bind(this));
-                this.customPatternInput.addEventListener('input', this.handleCustomPatternChange.bind(this));
+                this.defenseValueInput.addEventListener('input', this.handleDefenseValueChange.bind(this));
+                this.copperWallCheckbox.addEventListener('change', this.handleCopperWallChange.bind(this));
                 
                 // 标签页切换
                 this.tabs.forEach(tab => {
@@ -776,17 +1400,89 @@
                 this.updateCharts();
             },
             
+            handleTurnChange(e) {
+                const turn = e.target.getAttribute('data-turn');
+                
+                // 更新UI状态
+                this.turnBtns.forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                e.target.classList.add('active');
+                
+                // 切换先后手
+                model.switchTurnOrder(turn);
+                
+                // 更新UI
+                this.updateUI();
+                this.updateCharts();
+            },
+            
+            handleTalismanSliderChange(e) {
+                const waterValue = parseInt(e.target.value);
+                const fireValue = 25 - waterValue;
+                
+                model.waterValue = waterValue;
+                model.fireValue = fireValue;
+                
+                this.updateTalismanValues();
+                this.updateUI();
+                this.updateCharts();
+            },
+            
+            handleCritValueChange(e) {
+                model.critValue = parseInt(e.target.value) || 0;
+                this.updateCritRate();
+                this.updateUI();
+                this.updateCharts();
+            },
+            
+            handleCritResistanceChange(e) {
+                model.critResistance = parseInt(e.target.value) || 0;
+                this.updateCritRate();
+                this.updateUI();
+                this.updateCharts();
+            },
+            
+            handlePlayerLevelChange(e) {
+                model.playerLevel = Math.max(1, parseInt(e.target.value) || 1);
+                this.updateCritRate();
+                this.updateUI();
+                this.updateCharts();
+            },
+            
+            handlePhysicalCritChange(e) {
+                model.physicalCrit = e.target.checked;
+                this.updateCritRate();
+                this.updateUI();
+                this.updateCharts();
+            },
+            
+            handleCritDamageChange(e) {
+                model.critDamage = parseFloat(e.target.value) || 2.0;
+                this.updateUI();
+                this.updateCharts();
+            },
+            
+            // 更新暴击率显示
+            updateCritRate() {
+                const critRate = model.calculateCritRate();
+                this.critRateDisplay.textContent = `暴击率: ${(critRate * 100).toFixed(1)}%`;
+            },
+            
+            // 更新符价值显示
+            updateTalismanValues() {
+                this.waterValueOutput.textContent = model.waterValue;
+                this.fireValueOutput.textContent = model.fireValue;
+                this.waterEffectOutput.textContent = (model.getWaterEffect() * 100) + "%";
+                this.fireEffectOutput.textContent = (model.getFireEffect() * 100) + "%";
+            },
+            
             // 更新模式相关UI
             updateModeUI(mode) {
-                // PK模式参数显示控制
                 if (mode === "pk") {
-                    this.pkModeParams.style.display = "block";
-                    this.reductionTabItem.style.display = "block";
                     this.monsterConclusion.style.display = "none";
                     this.pkConclusion.style.display = "block";
                 } else {
-                    this.pkModeParams.style.display = "none";
-                    this.reductionTabItem.style.display = "none";
                     this.monsterConclusion.style.display = "block";
                     this.pkConclusion.style.display = "none";
                 }
@@ -798,9 +1494,21 @@
                 this.skillCoefficientInput.value = model.skillCoefficient;
                 this.totalRoundsInput.value = model.totalRounds;
                 this.enemyHPInput.value = this.formatNumber(model.enemyHP);
-                this.damageReductionInput.value = model.damageReduction;
-                this.patternSelect.value = model.selectedPattern;
-                this.customPatternInput.value = model.customPattern;
+                this.defenseValueInput.value = model.defenseValue;
+                this.copperWallCheckbox.checked = model.copperWall;
+                this.talismanSlider.value = model.waterValue;
+                
+                // 更新暴击相关值
+                this.critValueInput.value = model.critValue;
+                this.critResistanceInput.value = model.critResistance;
+                this.playerLevelInput.value = model.playerLevel;
+                this.physicalCritCheckbox.checked = model.physicalCrit;
+                this.critDamageInput.value = model.critDamage;
+                this.updateCritRate();
+                
+                // 更新减伤显示
+                const reduction = model.calculateDamageReduction();
+                this.damageReductionOutput.textContent = (reduction * 100).toFixed(1) + "%";
             },
             
             handleAttackPowerChange(e) {
@@ -827,28 +1535,24 @@
                 this.updateCharts();
             },
             
-            handleDamageReductionChange(e) {
-                model.damageReduction = parseFloat(e.target.value) || 50;
+            handleDefenseValueChange(e) {
+                model.defenseValue = parseInt(e.target.value) || 0;
+                
+                // 更新减伤显示
+                const reduction = model.calculateDamageReduction();
+                this.damageReductionOutput.textContent = (reduction * 100).toFixed(1) + "%";
+                
                 this.updateUI();
                 this.updateCharts();
             },
             
-            handlePatternSelectChange(e) {
-                model.selectedPattern = e.target.value;
-                if (model.selectedPattern !== "自定义") {
-                    this.customPatternInput.value = "";
-                    model.customPattern = "";
-                }
-                this.updateUI();
-                this.updateCharts();
-            },
-            
-            handleCustomPatternChange(e) {
-                model.customPattern = e.target.value;
-                if (model.selectedPattern !== "自定义") {
-                    model.selectedPattern = "自定义";
-                    this.patternSelect.value = "自定义";
-                }
+            handleCopperWallChange(e) {
+                model.copperWall = e.target.checked;
+                
+                // 更新减伤显示
+                const reduction = model.calculateDamageReduction();
+                this.damageReductionOutput.textContent = (reduction * 100).toFixed(1) + "%";
+                
                 this.updateUI();
                 this.updateCharts();
             },
@@ -873,9 +1577,9 @@
                 // 获取计算结果
                 const results = model.calculateBenefitRatio();
                 const criticalHP = model.calculateCriticalHP();
-                
-                // 更新模式预览
-                this.updatePatternPreview();
+                const bestCombo = model.findBestCombination();
+                const critRate = model.calculateCritRate();
+                const critMultiplier = model.calculateAvgCritMultiplier();
                 
                 // 更新结果数据
                 this.criticalHPOutput.textContent = this.formatNumber(Math.round(criticalHP));
@@ -885,45 +1589,65 @@
                 this.waterBenefitOutput.textContent = this.formatNumber(Math.round(results.waterBenefit));
                 this.benefitRatioOutput.textContent = results.ratio.toFixed(3);
                 this.ratioHintOutput.textContent = results.ratio > 1 ? "火符收益更高" : "水符收益更高";
+                this.totalBenefitOutput.textContent = this.formatNumber(Math.round(results.totalBenefit));
                 
-                // 更新推荐选择
-                this.bestChoiceOutput.textContent = results.bestChoice;
-                this.bestChoiceOutput.className = "result-value " + (results.bestChoice === "火符" ? "fire-color" : "water-color");
-                this.comparisonResultOutput.textContent = model.getCriticalComparison();
-            },
-            
-            updatePatternPreview() {
-                const pattern = model.getCurrentPattern().slice(0, model.totalRounds);
-                this.patternPreview.innerHTML = "";
+                // 配置类型
+                let configType;
+                if (model.waterValue === 0) configType = "纯火符";
+                else if (model.fireValue === 0) configType = "纯水符";
+                else configType = "混合搭配";
                 
-                pattern.forEach((value, index) => {
-                    const item = document.createElement("span");
-                    item.className = "pattern-item";
-                    item.textContent = value.toFixed(1);
-                    
-                    // 设置背景颜色
-                    if (value > 1) {
-                        item.style.backgroundColor = "#fecaca"; // 红色背景
-                    } else if (value < 1) {
-                        item.style.backgroundColor = "#bfdbfe"; // 蓝色背景
-                    } else {
-                        item.style.backgroundColor = "#e5e7eb"; // 灰色背景
-                    }
-                    
-                    this.patternPreview.appendChild(item);
-                });
+                this.currentConfigOutput.textContent = configType;
+                this.currentConfigOutput.className = "result-value " + 
+                    (configType === "纯火符" ? "fire-color" : 
+                     configType === "纯水符" ? "water-color" : "mix-color");
+                     
+                this.configHintOutput.textContent = `水${model.waterValue} + 火${model.fireValue}`;
+                this.effectiveRatioOutput.textContent = (results.effectiveRatio * 100).toFixed(1) + "%";
+                
+                // 更新暴击分析
+                this.expectedCritRate.textContent = (critRate * 100).toFixed(1) + "%";
+                this.critDamageMultiplier.textContent = model.critDamage.toFixed(1) + "倍";
+                this.avgDamageMultiplier.textContent = critMultiplier.toFixed(2) + "倍";
+                this.critFireImpact.textContent = "+" + results.critImpact.toFixed(1) + "%";
+                this.critWaterImpact.textContent = "+" + results.critImpact.toFixed(1) + "%";
+                
+                // 暴击影响下的推荐
+                let critRecommendation;
+                if (results.ratio > 1.05) critRecommendation = "偏向火符";
+                else if (results.ratio < 0.95) critRecommendation = "偏向水符";
+                else critRecommendation = "维持当前比例";
+                
+                this.critRecommendation.textContent = critRecommendation;
+                this.critRecommendation.className = 
+                    critRecommendation === "偏向火符" ? "fire-color" : 
+                    critRecommendation === "偏向水符" ? "water-color" : "mix-color";
+                
+                // 更新最优组合
+                this.improvementRatioOutput.textContent = "+" + bestCombo.improvement.toFixed(1) + "%";
+                this.bestWaterOutput.textContent = "水符: " + bestCombo.waterValue;
+                this.bestFireOutput.textContent = "火符: " + bestCombo.fireValue;
+                this.bestWaterEffectOutput.textContent = (bestCombo.waterEffect * 100) + "%";
+                this.bestFireEffectOutput.textContent = (bestCombo.fireEffect * 100) + "%";
+                this.bestTotalBenefitRatioOutput.textContent = (bestCombo.effectiveRatio * 100).toFixed(1) + "%";
+                this.bestDamageIncreaseOutput.textContent = this.formatNumber(Math.round(bestCombo.benefit));
+                this.bestHalfHpRoundOutput.textContent = bestCombo.halfHpRound + "/" + model.totalRounds;
+                
+                // 计算含暴击的总收益
+                const withCritBenefit = (bestCombo.effectiveRatio * critMultiplier) * 100;
+                this.bestTotalWithCrit.textContent = withCritBenefit.toFixed(1) + "%";
             },
             
             // 初始化图表
             initCharts() {
-                // 血量影响图表
-                this.hpChart = new Chart(this.hpChartCanvas, {
+                // 符价值分配图表
+                this.distributionChart = new Chart(this.distributionChartCanvas, {
                     type: 'line',
                     data: {
                         datasets: [{
-                            label: '收益比',
-                            borderColor: '#8884d8',
-                            backgroundColor: 'rgba(136, 132, 216, 0.1)',
+                            label: '总收益率(%)',
+                            borderColor: '#8b5cf6',
+                            backgroundColor: 'rgba(139, 92, 246, 0.1)',
                             borderWidth: 2,
                             pointRadius: 0,
                             pointHoverRadius: 4,
@@ -937,28 +1661,13 @@
                             tooltip: {
                                 callbacks: {
                                     label: function(context) {
-                                        const value = context.raw.benefitRatio.toFixed(3);
-                                        return `收益比: ${value}`;
+                                        const value = context.raw.effectiveRatio.toFixed(1);
+                                        return `收益率: ${value}%`;
                                     },
                                     title: function(context) {
-                                        const value = context[0].raw.hpMillions;
-                                        return `血量: ${value}百万`;
-                                    }
-                                }
-                            },
-                            annotation: {
-                                annotations: {
-                                    line1: {
-                                        type: 'line',
-                                        yMin: 1,
-                                        yMax: 1,
-                                        borderColor: 'red',
-                                        borderWidth: 1,
-                                        borderDash: [3, 3],
-                                        label: {
-                                            content: '临界值',
-                                            position: 'end'
-                                        }
+                                        const water = context[0].raw.waterValue;
+                                        const fire = context[0].raw.fireValue;
+                                        return `水符:${water} 火符:${fire}`;
                                     }
                                 }
                             }
@@ -967,32 +1676,40 @@
                             x: {
                                 title: {
                                     display: true,
-                                    text: '敌人血量(百万)'
+                                    text: '水符价值'
                                 }
                             },
                             y: {
                                 title: {
                                     display: true,
-                                    text: '火符/水符收益比'
+                                    text: '总收益率(%)'
                                 }
                             }
                         }
                     }
                 });
                 
-                // 攻击力影响图表
-                this.attackChart = new Chart(this.attackChartCanvas, {
-                    type: 'line',
+                // 回合分析图表
+                this.roundsChart = new Chart(this.roundsChartCanvas, {
+                    type: 'bar',
                     data: {
-                        datasets: [{
-                            label: '收益比',
-                            borderColor: '#4ade80',
-                            backgroundColor: 'rgba(74, 222, 128, 0.1)',
-                            borderWidth: 2,
-                            pointRadius: 0,
-                            pointHoverRadius: 4,
-                            tension: 0.3
-                        }]
+                        datasets: [
+                            {
+                                label: '基础伤害',
+                                backgroundColor: '#9ca3af',
+                                stack: 'Stack 0'
+                            },
+                            {
+                                label: '火符增益',
+                                backgroundColor: '#ef4444',
+                                stack: 'Stack 0'
+                            },
+                            {
+                                label: '水符增益',
+                                backgroundColor: '#3b82f6',
+                                stack: 'Stack 0'
+                            }
+                        ]
                     },
                     options: {
                         responsive: true,
@@ -1001,27 +1718,13 @@
                             tooltip: {
                                 callbacks: {
                                     label: function(context) {
-                                        const value = context.raw.benefitRatio.toFixed(3);
-                                        return `收益比: ${value}`;
-                                    },
-                                    title: function(context) {
-                                        const value = context[0].raw.attackK;
-                                        return `攻击力: ${value}万`;
-                                    }
-                                }
-                            },
-                            annotation: {
-                                annotations: {
-                                    line1: {
-                                        type: 'line',
-                                        yMin: 1,
-                                        yMax: 1,
-                                        borderColor: 'red',
-                                        borderWidth: 1,
-                                        borderDash: [3, 3],
-                                        label: {
-                                            content: '临界值',
-                                            position: 'end'
+                                        const value = context.raw.y;
+                                        if (context.datasetIndex === 0) {
+                                            return `基础伤害: ${value.toLocaleString()}`;
+                                        } else if (context.datasetIndex === 1) {
+                                            return `火符增益: ${value.toLocaleString()}`;
+                                        } else {
+                                            return `水符增益: ${value.toLocaleString()}`;
                                         }
                                     }
                                 }
@@ -1031,32 +1734,112 @@
                             x: {
                                 title: {
                                     display: true,
-                                    text: '攻击力(万)'
+                                    text: '回合数'
+                                },
+                                stacked: true
+                            },
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: '伤害值'
+                                },
+                                stacked: true
+                            }
+                        }
+                    }
+                });
+                
+                // 防御影响图表
+                this.defenseChart = new Chart(this.defenseChartCanvas, {
+                    type: 'line',
+                    data: {
+                        datasets: [
+                            {
+                                label: '正常',
+                                borderColor: '#8b5cf6',
+                                backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                                borderWidth: 2,
+                                pointRadius: 3
+                            },
+                            {
+                                label: '铜墙',
+                                borderColor: '#f59e0b',
+                                backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                                borderWidth: 2,
+                                pointRadius: 3,
+                                borderDash: [5, 5]
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const ratio = context.raw.effectiveRatio.toFixed(1);
+                                        const reduction = context.raw.reduction.toFixed(1);
+                                        return [
+                                            `收益率: ${ratio}%`,
+                                            `减伤: ${reduction}%`
+                                        ];
+                                    },
+                                    title: function(context) {
+                                        const defense = context[0].raw.defense;
+                                        return `防御值: ${defense.toLocaleString()}`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: '防御值'
                                 }
                             },
                             y: {
                                 title: {
                                     display: true,
-                                    text: '火符/水符收益比'
+                                    text: '总收益率(%)'
                                 }
                             }
                         }
                     }
                 });
                 
-                // 减伤系数影响图表（PK模式专用）
-                this.reductionChart = new Chart(this.reductionChartCanvas, {
+                // 暴击率影响图表
+                this.critChart = new Chart(this.critChartCanvas, {
                     type: 'line',
                     data: {
-                        datasets: [{
-                            label: '收益比',
-                            borderColor: '#f59e0b',
-                            backgroundColor: 'rgba(245, 158, 11, 0.1)',
-                            borderWidth: 2,
-                            pointRadius: 0,
-                            pointHoverRadius: 4,
-                            tension: 0.3
-                        }]
+                        datasets: [
+                            {
+                                label: '最优水符配比',
+                                borderColor: '#3b82f6',
+                                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                                borderWidth: 2,
+                                pointRadius: 3,
+                                yAxisID: 'y1'
+                            },
+                            {
+                                label: '最优火符配比',
+                                borderColor: '#ef4444',
+                                backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                                borderWidth: 2,
+                                pointRadius: 3,
+                                yAxisID: 'y1'
+                            },
+                            {
+                                label: '总收益率',
+                                borderColor: '#8b5cf6',
+                                backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                                borderWidth: 2,
+                                pointRadius: 0,
+                                borderDash: [5, 5],
+                                yAxisID: 'y2'
+                            }
+                        ]
                     },
                     options: {
                         responsive: true,
@@ -1065,28 +1848,18 @@
                             tooltip: {
                                 callbacks: {
                                     label: function(context) {
-                                        const value = context.raw.benefitRatio.toFixed(3);
-                                        return `收益比: ${value}`;
+                                        if (context.datasetIndex === 0) {
+                                            return `最优水符: ${context.raw.y}`;
+                                        } else if (context.datasetIndex === 1) {
+                                            return `最优火符: ${context.raw.y}`;
+                                        } else {
+                                            return `总收益率: ${context.raw.y.toFixed(1)}%`;
+                                        }
                                     },
                                     title: function(context) {
-                                        const value = context[0].raw.reduction;
-                                        return `减伤系数: ${value}%`;
-                                    }
-                                }
-                            },
-                            annotation: {
-                                annotations: {
-                                    line1: {
-                                        type: 'line',
-                                        yMin: 1,
-                                        yMax: 1,
-                                        borderColor: 'red',
-                                        borderWidth: 1,
-                                        borderDash: [3, 3],
-                                        label: {
-                                            content: '临界值',
-                                            position: 'end'
-                                        }
+                                        const critValue = context[0].raw.critValue;
+                                        const critRate = context[0].raw.critRate.toFixed(1);
+                                        return `暴击值: ${critValue} (${critRate}%)`;
                                     }
                                 }
                             }
@@ -1095,13 +1868,30 @@
                             x: {
                                 title: {
                                     display: true,
-                                    text: '减伤系数(%)'
+                                    text: '暴击值'
                                 }
                             },
-                            y: {
+                            y1: {
+                                type: 'linear',
+                                display: true,
+                                position: 'left',
                                 title: {
                                     display: true,
-                                    text: '火符/水符收益比'
+                                    text: '符价值'
+                                },
+                                min: 0,
+                                max: 25
+                            },
+                            y2: {
+                                type: 'linear',
+                                display: true,
+                                position: 'right',
+                                title: {
+                                    display: true,
+                                    text: '总收益率(%)'
+                                },
+                                grid: {
+                                    drawOnChartArea: false
                                 }
                             }
                         }
@@ -1113,39 +1903,106 @@
             
             // 更新图表数据
             updateCharts() {
-                // 更新基于血量的图表
-                const hpData = model.generateHpBasedData();
-                this.hpChart.data.labels = hpData.map(item => item.hpMillions);
-                this.hpChart.data.datasets[0].data = hpData.map(item => ({
-                    x: item.hpMillions,
-                    y: item.benefitRatio,
-                    benefitRatio: item.benefitRatio,
-                    hpMillions: item.hpMillions
+                // 更新符价值分配图表
+                const distributionData = model.generateDistributionData();
+                this.distributionChart.data.labels = distributionData.map(item => item.waterValue);
+                this.distributionChart.data.datasets[0].data = distributionData.map(item => ({
+                    x: item.waterValue,
+                    y: item.effectiveRatio,
+                    waterValue: item.waterValue,
+                    fireValue: item.fireValue,
+                    effectiveRatio: item.effectiveRatio
                 }));
-                this.hpChart.update();
                 
-                // 更新基于攻击力的图表
-                const attackData = model.generateAttackBasedData();
-                this.attackChart.data.labels = attackData.map(item => item.attackK);
-                this.attackChart.data.datasets[0].data = attackData.map(item => ({
-                    x: item.attackK,
-                    y: item.benefitRatio,
-                    benefitRatio: item.benefitRatio,
-                    attackK: item.attackK
+                // 标记当前选择的点
+                this.distributionChart.data.datasets[0].pointRadius = distributionData.map(item => 
+                    item.waterValue === model.waterValue ? 6 : 0
+                );
+                
+                // 标记最优组合的点
+                const bestCombo = model.findBestCombination();
+                this.distributionChart.data.datasets[0].pointBackgroundColor = distributionData.map(item => 
+                    item.waterValue === bestCombo.waterValue ? '#ef4444' : '#8b5cf6'
+                );
+                
+                this.distributionChart.update();
+                
+                // 更新回合分析图表
+                const roundsData = model.generateRoundsData();
+                this.roundsChart.data.labels = roundsData.map(item => item.round);
+                
+                this.roundsChart.data.datasets[0].data = roundsData.map(item => ({
+                    x: item.round,
+                    y: item.baseDamage
                 }));
-                this.attackChart.update();
                 
-                // 如果是PK模式，更新减伤系数图表
-                if (model.gameMode === "pk") {
-                    const reductionData = model.generateReductionBasedData();
-                    this.reductionChart.data.labels = reductionData.map(item => item.reduction);
-                    this.reductionChart.data.datasets[0].data = reductionData.map(item => ({
-                        x: item.reduction,
-                        y: item.benefitRatio,
-                        benefitRatio: item.benefitRatio,
-                        reduction: item.reduction
+                this.roundsChart.data.datasets[1].data = roundsData.map(item => ({
+                    x: item.round,
+                    y: item.fireBenefit
+                }));
+                
+                this.roundsChart.data.datasets[2].data = roundsData.map(item => ({
+                    x: item.round,
+                    y: item.waterBenefit
+                }));
+                
+                this.roundsChart.update();
+                
+                // 更新防御影响图表
+                const defenseData = model.generateDefenseData();
+                
+                if (defenseData.length > 0) {
+                    // 将数据分为两组：带铜墙和不带铜墙
+                    const normalData = defenseData.filter(item => !item.withCopperWall);
+                    const copperWallData = defenseData.filter(item => item.withCopperWall);
+                    
+                    this.defenseChart.data.datasets[0].data = normalData.map(item => ({
+                        x: item.defense,
+                        y: item.effectiveRatio,
+                        defense: item.defense,
+                        reduction: item.reduction,
+                        effectiveRatio: item.effectiveRatio
                     }));
-                    this.reductionChart.update();
+                    
+                    this.defenseChart.data.datasets[1].data = copperWallData.map(item => ({
+                        x: item.defense,
+                        y: item.effectiveRatio,
+                        defense: item.defense,
+                        reduction: item.reduction,
+                        effectiveRatio: item.effectiveRatio
+                    }));
+                    
+                    this.defenseChart.update();
+                }
+                
+                // 更新暴击影响图表
+                const critData = model.generateCritRateData();
+                
+                if (critData.length > 0) {
+                    this.critChart.data.labels = critData.map(item => item.critValue);
+                    
+                    this.critChart.data.datasets[0].data = critData.map(item => ({
+                        x: item.critValue,
+                        y: item.bestWater,
+                        critValue: item.critValue,
+                        critRate: item.critRate
+                    }));
+                    
+                    this.critChart.data.datasets[1].data = critData.map(item => ({
+                        x: item.critValue,
+                        y: item.bestFire,
+                        critValue: item.critValue,
+                        critRate: item.critRate
+                    }));
+                    
+                    this.critChart.data.datasets[2].data = critData.map(item => ({
+                        x: item.critValue,
+                        y: item.effectiveRatio,
+                        critValue: item.critValue,
+                        critRate: item.critRate
+                    }));
+                    
+                    this.critChart.update();
                 }
             },
             
