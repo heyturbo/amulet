@@ -524,6 +524,16 @@
                 height: 200px;
             }
         }
+        
+        /* 分析说明样式 */
+        .analysis-note {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 6px;
+            background-color: #f0f9ff;
+            border: 1px solid #bae6fd;
+            font-size: 0.875rem;
+        }
     </style>
 </head>
 <body>
@@ -545,14 +555,14 @@
                     <div class="fire-value">火符: <span id="fireValue">15</span></div>
                 </div>
                 <div class="talisman-slider-container">
-                    <input type="range" min="0" max="25" value="10" class="talisman-slider" id="talismanSlider">
+                    <input type="range" min="0" max="25" step="5" value="10" class="talisman-slider" id="talismanSlider">
                 </div>
                 <div class="talisman-effect">
                     <div class="water-effect">再次释放概率: <span id="waterEffect">4%</span></div>
                     <div class="fire-effect">伤害提升: <span id="fireEffect">7%</span></div>
                 </div>
                 <div class="damage-range" style="text-align: center; margin-top: 15px;">
-                    注意: 只有5-20区间内可以混搭两种符，当一种符达到25点时，另一种符无效
+                    注意: 符的效果按照"价值/5向下取整"决定，一种符达到25点时，另一种符无效
                 </div>
             </div>
         </div>
@@ -603,7 +613,7 @@
                     </div>
                     
                     <div class="form-group">
-                        <label for="skillCoefficient">技能系数(非暴击):</label>
+                        <label for="skillCoefficient">技能系数:</label>
                         <input type="number" id="skillCoefficient" min="0.1" max="10" step="0.1" value="1.0">
                     </div>
                     
@@ -693,34 +703,13 @@
                 <div class="result-box">
                     <div class="result-label">当前配置</div>
                     <div id="currentConfig" class="result-value mix-color">混合搭配</div>
-                    <div id="configHint" class="result-hint">水15 + 火10</div>
+                    <div id="configHint" class="result-hint">水10 + 火15</div>
                 </div>
                 
                 <div class="result-box">
                     <div class="result-label">有效收益比</div>
                     <div id="effectiveRatio" class="result-value">15.3%</div>
                     <div class="result-hint">相比基础伤害的提升</div>
-                </div>
-            </div>
-            
-            <!-- 暴击影响分析 -->
-            <div class="result-box" style="margin-top: 15px;">
-                <div class="result-label">暴击影响分析</div>
-                <div class="grid grid-2" style="margin-top: 10px;">
-                    <div>
-                        <div class="stats-list">
-                            <div><span>预期暴击率:</span> <span id="expectedCritRate" class="crit-color">%</span></div>
-                            <div><span>暴击伤害倍率:</span> <span id="critDamageMultiplier">2.0倍</span></div>
-                            <div><span>平均伤害系数:</span> <span id="avgDamageMultiplier">倍</span></div>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="stats-list">
-                            <div><span>暴击对火符收益影响:</span> <span id="critFireImpact">+%</span></div>
-                            <div><span>暴击对水符收益影响:</span> <span id="critWaterImpact">+%</span></div>
-                            <div><span>优先推荐:</span> <span id="critRecommendation" class="mix-color"></span></div>
-                        </div>
-                    </div>
                 </div>
             </div>
             
@@ -742,6 +731,9 @@
                     <div><span>预期伤害提升:</span> <span id="bestDamageIncrease">720,000</span></div>
                     <div><span>半血回合数:</span> <span id="bestHalfHpRound">3/10</span></div>
                     <div><span>含暴击总收益:</span> <span id="bestTotalWithCrit" class="crit-color">27.9%</span></div>
+                </div>
+                <div class="analysis-note">
+                    <p id="bestAnalysisNote">推荐前倾重火符配置，当前战斗环境下火符的前期增伤更具价值。</p>
                 </div>
             </div>
         </div>
@@ -785,12 +777,12 @@
             <h3>实用结论</h3>
             <div id="monsterConclusion">
                 <ul class="conclusion-list">
-                    <li><strong>符价值分配:</strong> 根据战斗特点决定水火符的最佳分配</li>
+                    <li><strong>符价值分配:</strong> 根据战斗特点决定水火符的最佳分配，按照"价值/5向下取整"决定效果等级</li>
                     <li><strong>临界点影响:</strong> 攻击力越高、敌人血量越低，水符收益相对更高</li>
                     <li><strong>先手影响:</strong> 先手时火符相对更强，因为能享受更多回合的增伤</li>
                     <li><strong>减伤影响:</strong> 减伤越高，火符相对优势越大</li>
                     <li><strong>暴击考量:</strong> 暴击率提高更有利于短期爆发，进一步增强火符在早期回合的效果</li>
-                    <li><strong>混搭策略:</strong> 通常不会极端分配，而是根据具体情况选择合适的混搭方案</li>
+                    <li><strong>混搭策略:</strong> 往往纯火符或纯水符并非最优解，根据具体情况选择合适的混搭方案</li>
                 </ul>
             </div>
             
@@ -836,38 +828,36 @@
             damageRangeMax: 1.1,
             
             // 符效果表格
-            waterEffects: [0.02, 0.04, 0.06, 0.10, 0.15],
-            fireEffects: [0.02, 0.04, 0.07, 0.12, 0.20],
+            waterEffects: [0, 0.02, 0.04, 0.06, 0.10, 0.15],
+            fireEffects: [0, 0.02, 0.04, 0.07, 0.12, 0.20],
             
             // 获取当前水符等级(考虑排他性)
             getWaterLevel() {
                 // 当火符为25时，水符无效
                 if (this.fireValue >= 25) {
-                    return -1; // 无效
+                    return 0; // 无效，返回0级
                 }
-                return Math.min(4, Math.floor(this.waterValue / 5));
+                return Math.min(5, Math.floor(this.waterValue / 5));
             },
             
             // 获取当前火符等级(考虑排他性)
             getFireLevel() {
                 // 当水符为25时，火符无效
                 if (this.waterValue >= 25) {
-                    return -1; // 无效
+                    return 0; // 无效，返回0级
                 }
-                return Math.min(4, Math.floor(this.fireValue / 5));
+                return Math.min(5, Math.floor(this.fireValue / 5));
             },
             
             // 获取当前水符效果
             getWaterEffect() {
                 const level = this.getWaterLevel();
-                if (level < 0) return 0; // 无效
                 return this.waterEffects[level];
             },
             
             // 获取当前火符效果
             getFireEffect() {
                 const level = this.getFireLevel();
-                if (level < 0) return 0; // 无效
                 return this.fireEffects[level];
             },
             
@@ -1007,7 +997,8 @@
                 
                 // 总收益
                 const totalBenefit = fireBenefit + waterBenefit;
-                const ratio = fireBenefit / waterBenefit;
+                // 收益比率，如果水符收益为0，返回Infinity
+                const ratio = waterBenefit > 0 ? fireBenefit / waterBenefit : Infinity;
                 
                 // 相对于总伤害的收益比
                 const totalBaseDamage = baseDamages.reduce((a, b) => a + b, 0);
@@ -1030,18 +1021,57 @@
                     effectiveRatio,
                     critMultiplier,
                     critImpact,
-                    bestChoice: ratio > 1 ? "火符" : "水符"
+                    bestChoice: ratio > 1 ? "火符" : (ratio < 0.95 ? "水符" : "混合")
                 };
             },
             
-            // 寻找最优组合
+            // 分析战斗属性，生成推荐说明
+            generateRecommendation(bestCombo) {
+                // 基于最优组合的水火比例和半血回合等信息
+                const waterValue = bestCombo.waterValue;
+                const fireValue = bestCombo.fireValue;
+                const halfHpRound = bestCombo.halfHpRound;
+                const totalRounds = this.totalRounds;
+                const halfHpPercentage = (halfHpRound / totalRounds) * 100;
+                
+                // 生成合适的推荐语句
+                if (waterValue === 0) {
+                    // 纯火符情况
+                    if (halfHpPercentage <= 30) {
+                        return "推荐纯火符配置，敌人血量降至半血所需时间短，火符前期增伤效果能够最大化发挥。";
+                    } else if (halfHpPercentage <= 60) {
+                        return "推荐纯火符配置，在这种战斗环境下，敌人半血前的增伤效果远超水符的再次释放收益。";
+                    } else {
+                        return "推荐纯火符配置，当前战斗周期长且血量比例高，火符的持续增伤提供最高收益。";
+                    }
+                } else if (fireValue === 0) {
+                    // 纯水符情况
+                    if (halfHpPercentage <= 20) {
+                        return "推荐纯水符配置，敌人血量迅速降至半血以下，水符的再次释放效果更具持续价值。";
+                    } else {
+                        return "推荐纯水符配置，您的攻击力能快速突破敌人半血线，水符在全程都能提供稳定收益。";
+                    }
+                } else {
+                    // 混搭情况
+                    if (fireValue > waterValue) {
+                        return `推荐前倾重火符配置(${fireValue}火${waterValue}水)，当前战斗环境下火符的前期增伤配合少量水符效果最优。`;
+                    } else if (fireValue < waterValue) {
+                        return `推荐前倾重水符配置(${waterValue}水${fireValue}火)，您的输出能力下，这种配置在整场战斗中提供最平衡收益。`;
+                    } else {
+                        return `推荐平衡配置(${waterValue}水${fireValue}火)，此配置能在前期和后期都提供稳定收益，适合长期战斗。`;
+                    }
+                }
+            },
+            
+            // 寻找最优组合 - 修正版本，正确考虑符价值的向下取整效果
             findBestCombination() {
                 const originalWater = this.waterValue;
                 const originalFire = this.fireValue;
                 
+                // 初始默认为纯火符
                 let bestCombo = { waterValue: 0, fireValue: 25, benefit: 0 };
                 
-                // 尝试所有可能的分配方式
+                // 尝试所有可能的分配方式 (只考虑5的倍数)
                 for (let waterValue = 0; waterValue <= 25; waterValue += 5) {
                     const fireValue = 25 - waterValue;
                     
@@ -1073,11 +1103,15 @@
                 
                 // 计算当前组合与最优组合的差异
                 const currentResult = this.calculateBenefitRatio();
-                const improvement = (bestCombo.benefit / currentResult.totalBenefit - 1) * 100;
+                const improvement = (bestCombo.benefit / (currentResult.totalBenefit || 1) - 1) * 100;
+                
+                // 添加分析推荐说明
+                const recommendation = this.generateRecommendation(bestCombo);
                 
                 return {
                     ...bestCombo,
-                    improvement: improvement
+                    improvement: improvement,
+                    recommendation: recommendation
                 };
             },
             
@@ -1087,7 +1121,7 @@
                 const originalWater = this.waterValue;
                 const originalFire = this.fireValue;
                 
-                for (let waterValue = 0; waterValue <= 25; waterValue++) {
+                for (let waterValue = 0; waterValue <= 25; waterValue += 5) {
                     const fireValue = 25 - waterValue;
                     
                     // 设置当前测试的价值分配
@@ -1105,11 +1139,37 @@
                     });
                 }
                 
+                // 填充中间的连续点以平滑曲线
+                let smoothedData = [];
+                for (let i = 0; i < data.length - 1; i++) {
+                    const current = data[i];
+                    const next = data[i + 1];
+                    
+                    smoothedData.push(current);
+                    
+                    // 添加4个插值点
+                    for (let j = 1; j <= 4; j++) {
+                        const fraction = j / 5;
+                        const interpolatedWaterValue = current.waterValue + (next.waterValue - current.waterValue) * fraction;
+                        const interpolatedFireValue = current.fireValue + (next.fireValue - current.fireValue) * fraction;
+                        const interpolatedRatio = current.effectiveRatio + (next.effectiveRatio - current.effectiveRatio) * fraction;
+                        
+                        smoothedData.push({
+                            waterValue: interpolatedWaterValue,
+                            fireValue: interpolatedFireValue,
+                            effectiveRatio: interpolatedRatio
+                        });
+                    }
+                }
+                
+                // 添加最后一个点
+                smoothedData.push(data[data.length - 1]);
+                
                 // 恢复原始值
                 this.waterValue = originalWater;
                 this.fireValue = originalFire;
                 
-                return data;
+                return smoothedData;
             },
             
             // 生成回合分析数据
@@ -1233,7 +1293,6 @@
                     this.critValue = critValue;
                     const critRate = this.calculateCritRate();
                     const critMultiplier = this.calculateAvgCritMultiplier();
-                    const result = this.calculateBenefitRatio();
                     
                     // 计算理想的水火符分配
                     let bestWaterFire = this.findBestCombination();
@@ -1241,11 +1300,9 @@
                     data.push({
                         critValue,
                         critRate: critRate * 100,
-                        fireRatio: result.fireBenefit / (result.fireBenefit + result.waterBenefit) * 100,
-                        waterRatio: result.waterBenefit / (result.fireBenefit + result.waterBenefit) * 100,
-                        effectiveRatio: result.effectiveRatio * 100,
                         bestWater: bestWaterFire.waterValue,
-                        bestFire: bestWaterFire.fireValue
+                        bestFire: bestWaterFire.fireValue,
+                        effectiveRatio: bestWaterFire.effectiveRatio * 100
                     });
                 }
                 
@@ -1304,14 +1361,6 @@
                 this.critDamageInput = document.getElementById('critDamage');
                 this.critRateDisplay = document.getElementById('critRateDisplay');
                 
-                // 暴击分析元素
-                this.expectedCritRate = document.getElementById('expectedCritRate');
-                this.critDamageMultiplier = document.getElementById('critDamageMultiplier');
-                this.avgDamageMultiplier = document.getElementById('avgDamageMultiplier');
-                this.critFireImpact = document.getElementById('critFireImpact');
-                this.critWaterImpact = document.getElementById('critWaterImpact');
-                this.critRecommendation = document.getElementById('critRecommendation');
-                
                 // 输入元素
                 this.attackPowerInput = document.getElementById('attackPower');
                 this.skillCoefficientInput = document.getElementById('skillCoefficient');
@@ -1349,6 +1398,7 @@
                 this.bestDamageIncreaseOutput = document.getElementById('bestDamageIncrease');
                 this.bestHalfHpRoundOutput = document.getElementById('bestHalfHpRound');
                 this.bestTotalWithCrit = document.getElementById('bestTotalWithCrit');
+                this.bestAnalysisNote = document.getElementById('bestAnalysisNote');
                 
                 // 图表
                 this.distributionChartCanvas = document.getElementById('distributionChartCanvas');
@@ -1607,8 +1657,16 @@
                 this.halfHpRoundOutput.textContent = `${results.halfHpRound} / ${model.totalRounds}`;
                 this.fireBenefitOutput.textContent = this.formatNumber(Math.round(results.fireBenefit));
                 this.waterBenefitOutput.textContent = this.formatNumber(Math.round(results.waterBenefit));
-                this.benefitRatioOutput.textContent = results.ratio.toFixed(3);
-                this.ratioHintOutput.textContent = results.ratio > 1 ? "火符收益更高" : "水符收益更高";
+                this.benefitRatioOutput.textContent = isFinite(results.ratio) ? results.ratio.toFixed(3) : "∞";
+                
+                if (results.waterBenefit === 0) {
+                    this.ratioHintOutput.textContent = "水符无效";
+                } else if (results.fireBenefit === 0) {
+                    this.ratioHintOutput.textContent = "火符无效";
+                } else {
+                    this.ratioHintOutput.textContent = results.ratio > 1 ? "火符收益更高" : "水符收益更高";
+                }
+                
                 this.totalBenefitOutput.textContent = this.formatNumber(Math.round(results.totalBenefit));
                 
                 // 配置类型
@@ -1625,24 +1683,6 @@
                 this.configHintOutput.textContent = `水${model.waterValue} + 火${model.fireValue}`;
                 this.effectiveRatioOutput.textContent = (results.effectiveRatio * 100).toFixed(1) + "%";
                 
-                // 更新暴击分析
-                this.expectedCritRate.textContent = (critRate * 100).toFixed(1) + "%";
-                this.critDamageMultiplier.textContent = model.critDamage.toFixed(1) + "倍";
-                this.avgDamageMultiplier.textContent = critMultiplier.toFixed(2) + "倍";
-                this.critFireImpact.textContent = "+" + results.critImpact.toFixed(1) + "%";
-                this.critWaterImpact.textContent = "+" + results.critImpact.toFixed(1) + "%";
-                
-                // 暴击影响下的推荐
-                let critRecommendation;
-                if (results.ratio > 1.05) critRecommendation = "偏向火符";
-                else if (results.ratio < 0.95) critRecommendation = "偏向水符";
-                else critRecommendation = "维持当前比例";
-                
-                this.critRecommendation.textContent = critRecommendation;
-                this.critRecommendation.className = 
-                    critRecommendation === "偏向火符" ? "fire-color" : 
-                    critRecommendation === "偏向水符" ? "water-color" : "mix-color";
-                
                 // 更新最优组合
                 this.improvementRatioOutput.textContent = "+" + bestCombo.improvement.toFixed(1) + "%";
                 this.bestWaterOutput.textContent = "水符: " + bestCombo.waterValue;
@@ -1656,6 +1696,9 @@
                 // 计算含暴击的总收益
                 const withCritBenefit = (bestCombo.effectiveRatio * critMultiplier) * 100;
                 this.bestTotalWithCrit.textContent = withCritBenefit.toFixed(1) + "%";
+                
+                // 更新分析说明
+                this.bestAnalysisNote.textContent = bestCombo.recommendation;
             },
             
             // 初始化图表
@@ -1685,8 +1728,8 @@
                                         return `收益率: ${value}%`;
                                     },
                                     title: function(context) {
-                                        const water = context[0].raw.waterValue;
-                                        const fire = context[0].raw.fireValue;
+                                        const water = Math.round(context[0].raw.waterValue);
+                                        const fire = Math.round(context[0].raw.fireValue);
                                         return `水符:${water} 火符:${fire}`;
                                     }
                                 }
@@ -1936,13 +1979,13 @@
                 
                 // 标记当前选择的点
                 this.distributionChart.data.datasets[0].pointRadius = distributionData.map(item => 
-                    item.waterValue === model.waterValue ? 6 : 0
+                    Math.abs(item.waterValue - model.waterValue) < 1 ? 6 : 0
                 );
                 
                 // 标记最优组合的点
                 const bestCombo = model.findBestCombination();
                 this.distributionChart.data.datasets[0].pointBackgroundColor = distributionData.map(item => 
-                    item.waterValue === bestCombo.waterValue ? '#ef4444' : '#8b5cf6'
+                    Math.abs(item.waterValue - bestCombo.waterValue) < 1 ? '#ef4444' : '#8b5cf6'
                 );
                 
                 this.distributionChart.update();
