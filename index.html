@@ -211,6 +211,42 @@
             display: block;
         }
         
+        /* 模式切换按钮样式 */
+        .mode-switcher {
+            display: flex;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+        
+        .mode-btn {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            background-color: var(--bg-light);
+            transition: all 0.2s ease;
+            font-weight: 500;
+        }
+        
+        .mode-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .mode-btn:first-child {
+            border-right: 1px solid var(--border-color);
+        }
+        
+        /* 伤害波动提示样式 */
+        .damage-range {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            margin-top: 5px;
+            font-style: italic;
+        }
+        
         @media (max-width: 480px) {
             .grid-4 {
                 grid-template-columns: 1fr;
@@ -233,6 +269,12 @@
 <body>
     <div class="container">
         <h1>水符/火符收益计算器</h1>
+        
+        <!-- 模式切换 -->
+        <div class="mode-switcher">
+            <div class="mode-btn active" data-mode="monster">野怪模式</div>
+            <div class="mode-btn" data-mode="pk">PK模式</div>
+        </div>
         
         <!-- 控制面板 -->
         <div class="card">
@@ -258,6 +300,15 @@
                     <div class="form-group">
                         <label for="enemyHP">敌人血量:</label>
                         <input type="text" id="enemyHP" value="15,000,000">
+                    </div>
+                    
+                    <!-- PK模式专用参数 -->
+                    <div id="pkModeParams" class="form-group" style="display: none;">
+                        <label for="damageReduction">减伤系数 (%):</label>
+                        <input type="number" id="damageReduction" min="0" max="90" step="1" value="50">
+                        <div class="damage-range">
+                            伤害波动范围: 0.9 ~ 1.1 (默认)
+                        </div>
                     </div>
                 </div>
                 
@@ -336,6 +387,7 @@
             <div class="tab-container">
                 <div class="tab active" data-tab="hpChart">敌人血量影响</div>
                 <div class="tab" data-tab="attackChart">攻击力影响</div>
+                <div id="reductionTabItem" class="tab" data-tab="reductionChart" style="display: none;">减伤系数影响</div>
             </div>
             
             <div id="hpChart" class="tab-content active">
@@ -349,24 +401,43 @@
                     <canvas id="attackChartCanvas"></canvas>
                 </div>
             </div>
+            
+            <div id="reductionChart" class="tab-content">
+                <div class="chart-container">
+                    <canvas id="reductionChartCanvas"></canvas>
+                </div>
+            </div>
         </div>
         
         <!-- 结论 -->
         <div class="card">
             <h3>实用结论</h3>
-            <ul class="conclusion-list">
-                <li><strong>临界值公式:</strong> 敌人血量 = 攻击力 × 技能系数 × 1.5 × 回合数</li>
-                <li><strong>当敌人血量 &lt; 临界值时:</strong> 水符更优 (15%的持续收益)</li>
-                <li><strong>当敌人血量 &gt; 临界值时:</strong> 火符更优 (敌人长时间保持在半血以上)</li>
-                <li><strong>技能伤害分布影响:</strong> 前期高伤害分布更有利于火符，后期高伤害分布更有利于水符</li>
-                <li><strong>实战选择:</strong> 对抗小怪群通常选择水符，对抗高血量BOSS通常选择火符</li>
-            </ul>
+            <div id="monsterConclusion">
+                <ul class="conclusion-list">
+                    <li><strong>临界值公式:</strong> 敌人血量 = 攻击力 × 技能系数 × 1.5 × 回合数</li>
+                    <li><strong>当敌人血量 &lt; 临界值时:</strong> 水符更优 (15%的持续收益)</li>
+                    <li><strong>当敌人血量 &gt; 临界值时:</strong> 火符更优 (敌人长时间保持在半血以上)</li>
+                    <li><strong>技能伤害分布影响:</strong> 前期高伤害分布更有利于火符，后期高伤害分布更有利于水符</li>
+                    <li><strong>实战选择:</strong> 对抗小怪群通常选择水符，对抗高血量BOSS通常选择火符</li>
+                </ul>
+            </div>
+            
+            <div id="pkConclusion" style="display: none;">
+                <ul class="conclusion-list">
+                    <li><strong>PK临界值公式:</strong> 敌人有效血量 = 实际血量 ÷ (1 - 减伤系数)</li>
+                    <li><strong>减伤系数影响:</strong> 减伤越高，火符优势越明显（敌人实际血量变厚）</li>
+                    <li><strong>战斗节奏:</strong> PK战斗中选择火符通常更优，因减伤效果延长了敌人半血之前的时间</li>
+                    <li><strong>波动伤害:</strong> 伤害波动会使战斗更加不可预测，整体收益比计算基于平均值</li>
+                    <li><strong>实战选择:</strong> 高减伤战斗选择火符，快速击杀战斗选择水符</li>
+                </ul>
+            </div>
         </div>
     </div>
 
     <script>
         // 数据模型
         const model = {
+            // 基本参数
             attackPower: 300000,
             skillCoefficient: 1.0,
             totalRounds: 10,
@@ -374,6 +445,13 @@
             selectedPattern: "均衡伤害",
             customPattern: "",
             
+            // 模式设置
+            gameMode: "monster", // monster 或 pk
+            damageReduction: 50, // 百分比，默认50%
+            damageRangeMin: 0.9,
+            damageRangeMax: 1.1,
+            
+            // 技能模式预设
             skillPatterns: {
                 "均衡伤害": Array(10).fill(1.0),
                 "前期高伤": [1.5, 1.5, 1.5, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75],
@@ -397,10 +475,42 @@
                 return this.skillPatterns[this.selectedPattern] || this.skillPatterns["均衡伤害"];
             },
             
+            // 获取实际有效血量（考虑减伤）
+            getEffectiveHP() {
+                if (this.gameMode === "pk") {
+                    // 减伤影响：实际血量 / (1 - 减伤系数)
+                    return this.enemyHP / (1 - this.damageReduction / 100);
+                }
+                return this.enemyHP;
+            },
+            
+            // 计算平均伤害（考虑波动）
+            getAverageDamage(baseDamage) {
+                if (this.gameMode === "pk") {
+                    // 计算波动后的平均伤害
+                    const minDamage = baseDamage * this.damageRangeMin;
+                    const maxDamage = baseDamage * this.damageRangeMax;
+                    const avgDamage = (minDamage + maxDamage) / 2;
+                    
+                    // 应用减伤
+                    return avgDamage * (1 - this.damageReduction / 100);
+                }
+                return baseDamage;
+            },
+            
             // 计算临界血量
             calculateCriticalHP() {
                 const effectiveAttack = this.attackPower * this.skillCoefficient;
-                return effectiveAttack * 1.5 * this.totalRounds;
+                // 基础临界公式
+                let criticalHP = effectiveAttack * 1.5 * this.totalRounds;
+                
+                // PK模式需要考虑减伤
+                if (this.gameMode === "pk") {
+                    const effectiveDamage = this.getAverageDamage(effectiveAttack);
+                    criticalHP = effectiveDamage * 1.5 * this.totalRounds;
+                }
+                
+                return criticalHP;
             },
             
             // 计算效益比
@@ -413,16 +523,20 @@
                     pattern.push(1.0);
                 }
                 
-                // 计算实际伤害序列
-                const damages = pattern.map(p => effectiveAttack * p);
+                // 计算实际伤害序列（考虑减伤和波动）
+                const damages = pattern.map(p => {
+                    const baseDamage = effectiveAttack * p;
+                    return this.getAverageDamage(baseDamage);
+                });
                 
                 // 计算累积伤害和达到半血的回合
                 let cumulativeDamage = 0;
                 let halfHpRound = this.totalRounds;
+                const effectiveHP = this.getEffectiveHP();
                 
                 for (let i = 0; i < damages.length; i++) {
                     cumulativeDamage += damages[i];
-                    if (cumulativeDamage >= this.enemyHP / 2) {
+                    if (cumulativeDamage >= effectiveHP / 2) {
                         halfHpRound = i + 1;
                         break;
                     }
@@ -445,10 +559,12 @@
             // 临界血量与当前敌人血量的比较结果
             getCriticalComparison() {
                 const criticalHP = this.calculateCriticalHP();
-                if (Math.abs(this.enemyHP - criticalHP) / criticalHP < 0.05) {
+                const effectiveHP = this.getEffectiveHP();
+                
+                if (Math.abs(effectiveHP - criticalHP) / criticalHP < 0.05) {
                     return "接近临界值";
                 }
-                return this.enemyHP > criticalHP ? "选择火符更优" : "选择水符更优";
+                return effectiveHP > criticalHP ? "选择火符更优" : "选择水符更优";
             },
             
             // 生成基于血量的收益比数据
@@ -457,44 +573,30 @@
                 const data = [];
                 
                 // 生成从敌人血量20%到200%的范围
-                const minHP = this.enemyHP * 0.2;
-                const maxHP = this.enemyHP * 2;
+                const baseHP = this.enemyHP;
+                const minHP = baseHP * 0.2;
+                const maxHP = baseHP * 2;
                 const steps = 40;
                 const step = (maxHP - minHP) / steps;
                 
                 for (let i = 0; i <= steps; i++) {
                     const hp = minHP + i * step;
+                    // 暂存当前血量
+                    const originalHP = this.enemyHP;
+                    // 设置新血量进行计算
+                    this.enemyHP = hp;
+                    
                     // 使用当前选择的技能模式计算
-                    const pattern = this.getCurrentPattern().slice(0, this.totalRounds);
-                    while (pattern.length < this.totalRounds) {
-                        pattern.push(1.0);
-                    }
+                    const results = this.calculateBenefitRatio();
                     
-                    // 计算实际伤害序列
-                    const damages = pattern.map(p => effectiveAttack * p);
-                    
-                    // 计算半血回合
-                    let cumulativeDamage = 0;
-                    let halfHpRound = this.totalRounds;
-                    
-                    for (let j = 0; j < damages.length; j++) {
-                        cumulativeDamage += damages[j];
-                        if (cumulativeDamage >= hp / 2) {
-                            halfHpRound = j + 1;
-                            break;
-                        }
-                    }
-                    
-                    // 计算火符和水符收益
-                    const fireBenefit = 0.2 * damages.slice(0, halfHpRound).reduce((a, b) => a + b, 0);
-                    const waterBenefit = 0.15 * damages.reduce((a, b) => a + b, 0);
-                    const ratio = fireBenefit / waterBenefit;
+                    // 恢复原血量
+                    this.enemyHP = originalHP;
                     
                     data.push({
                         hp: hp,
                         hpMillions: (hp / 1000000).toFixed(2),
-                        benefitRatio: ratio,
-                        bestChoice: ratio > 1 ? "火符" : "水符"
+                        benefitRatio: results.ratio,
+                        bestChoice: results.bestChoice
                     });
                 }
                 
@@ -504,50 +606,83 @@
             // 生成基于攻击力的收益比数据
             generateAttackBasedData() {
                 const data = [];
-                const minAttack = this.attackPower * 0.2;
-                const maxAttack = this.attackPower * 2;
+                const baseAttack = this.attackPower;
+                const minAttack = baseAttack * 0.2;
+                const maxAttack = baseAttack * 2;
                 const steps = 40;
                 const step = (maxAttack - minAttack) / steps;
                 
                 for (let i = 0; i <= steps; i++) {
                     const atk = minAttack + i * step;
-                    const effectiveAttack = atk * this.skillCoefficient;
+                    // 暂存当前攻击力
+                    const originalAttack = this.attackPower;
+                    // 设置新攻击力进行计算
+                    this.attackPower = atk;
                     
-                    // 使用当前选择的技能模式计算
-                    const pattern = this.getCurrentPattern().slice(0, this.totalRounds);
-                    while (pattern.length < this.totalRounds) {
-                        pattern.push(1.0);
-                    }
+                    // 计算新结果
+                    const results = this.calculateBenefitRatio();
                     
-                    // 计算实际伤害序列
-                    const damages = pattern.map(p => effectiveAttack * p);
-                    
-                    // 计算半血回合
-                    let cumulativeDamage = 0;
-                    let halfHpRound = this.totalRounds;
-                    
-                    for (let j = 0; j < damages.length; j++) {
-                        cumulativeDamage += damages[j];
-                        if (cumulativeDamage >= this.enemyHP / 2) {
-                            halfHpRound = j + 1;
-                            break;
-                        }
-                    }
-                    
-                    // 计算火符和水符收益
-                    const fireBenefit = 0.2 * damages.slice(0, halfHpRound).reduce((a, b) => a + b, 0);
-                    const waterBenefit = 0.15 * damages.reduce((a, b) => a + b, 0);
-                    const ratio = fireBenefit / waterBenefit;
+                    // 恢复原攻击力
+                    this.attackPower = originalAttack;
                     
                     data.push({
                         attack: atk,
                         attackK: (atk / 10000).toFixed(1),
-                        benefitRatio: ratio,
-                        bestChoice: ratio > 1 ? "火符" : "水符"
+                        benefitRatio: results.ratio,
+                        bestChoice: results.bestChoice
                     });
                 }
                 
                 return data;
+            },
+            
+            // 生成基于减伤系数的收益比数据（仅PK模式）
+            generateReductionBasedData() {
+                if (this.gameMode !== "pk") return [];
+                
+                const data = [];
+                const minReduction = 0;
+                const maxReduction = 90;
+                const steps = 40;
+                const step = (maxReduction - minReduction) / steps;
+                
+                for (let i = 0; i <= steps; i++) {
+                    const reduction = minReduction + i * step;
+                    // 暂存当前减伤
+                    const originalReduction = this.damageReduction;
+                    // 设置新减伤进行计算
+                    this.damageReduction = reduction;
+                    
+                    // 计算新结果
+                    const results = this.calculateBenefitRatio();
+                    
+                    // 恢复原减伤
+                    this.damageReduction = originalReduction;
+                    
+                    data.push({
+                        reduction: reduction,
+                        benefitRatio: results.ratio,
+                        bestChoice: results.bestChoice
+                    });
+                }
+                
+                return data;
+            },
+            
+            // 切换游戏模式并设置相应默认值
+            switchGameMode(mode) {
+                this.gameMode = mode;
+                
+                if (mode === "pk") {
+                    // 切换到PK模式的默认值
+                    this.enemyHP = 1000000; // 100万
+                    this.damageReduction = 50; // 50%
+                    this.selectedPattern = "波动伤害"; // 波动伤害模式
+                } else {
+                    // 切换回野怪模式的默认值
+                    this.enemyHP = 15000000; // 1500万
+                    // 保持当前的模式和其他设置
+                }
             }
         };
         
@@ -561,13 +696,22 @@
             },
             
             bindElements() {
+                // 模式切换按钮
+                this.modeBtns = document.querySelectorAll('.mode-btn');
+                
                 // 输入元素
                 this.attackPowerInput = document.getElementById('attackPower');
                 this.skillCoefficientInput = document.getElementById('skillCoefficient');
                 this.totalRoundsInput = document.getElementById('totalRounds');
                 this.enemyHPInput = document.getElementById('enemyHP');
+                this.damageReductionInput = document.getElementById('damageReduction');
+                this.pkModeParams = document.getElementById('pkModeParams');
                 this.patternSelect = document.getElementById('patternSelect');
                 this.customPatternInput = document.getElementById('customPattern');
+                
+                // 结论显示
+                this.monsterConclusion = document.getElementById('monsterConclusion');
+                this.pkConclusion = document.getElementById('pkConclusion');
                 
                 // 输出元素
                 this.patternPreview = document.getElementById('patternPreview');
@@ -584,6 +728,8 @@
                 // 图表
                 this.hpChartCanvas = document.getElementById('hpChartCanvas');
                 this.attackChartCanvas = document.getElementById('attackChartCanvas');
+                this.reductionChartCanvas = document.getElementById('reductionChartCanvas');
+                this.reductionTabItem = document.getElementById('reductionTabItem');
                 
                 // 标签页
                 this.tabs = document.querySelectorAll('.tab');
@@ -591,11 +737,17 @@
             },
             
             bindEvents() {
+                // 模式切换事件
+                this.modeBtns.forEach(btn => {
+                    btn.addEventListener('click', this.handleModeChange.bind(this));
+                });
+                
                 // 输入事件
                 this.attackPowerInput.addEventListener('input', this.handleAttackPowerChange.bind(this));
                 this.skillCoefficientInput.addEventListener('input', this.handleSkillCoefficientChange.bind(this));
                 this.totalRoundsInput.addEventListener('input', this.handleTotalRoundsChange.bind(this));
                 this.enemyHPInput.addEventListener('input', this.handleEnemyHPChange.bind(this));
+                this.damageReductionInput.addEventListener('input', this.handleDamageReductionChange.bind(this));
                 this.patternSelect.addEventListener('change', this.handlePatternSelectChange.bind(this));
                 this.customPatternInput.addEventListener('input', this.handleCustomPatternChange.bind(this));
                 
@@ -603,6 +755,52 @@
                 this.tabs.forEach(tab => {
                     tab.addEventListener('click', this.handleTabClick.bind(this));
                 });
+            },
+            
+            handleModeChange(e) {
+                const mode = e.target.getAttribute('data-mode');
+                
+                // 更新UI状态
+                this.modeBtns.forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                e.target.classList.add('active');
+                
+                // 切换模式
+                model.switchGameMode(mode);
+                
+                // 更新UI
+                this.updateModeUI(mode);
+                this.updateInputValues();
+                this.updateUI();
+                this.updateCharts();
+            },
+            
+            // 更新模式相关UI
+            updateModeUI(mode) {
+                // PK模式参数显示控制
+                if (mode === "pk") {
+                    this.pkModeParams.style.display = "block";
+                    this.reductionTabItem.style.display = "block";
+                    this.monsterConclusion.style.display = "none";
+                    this.pkConclusion.style.display = "block";
+                } else {
+                    this.pkModeParams.style.display = "none";
+                    this.reductionTabItem.style.display = "none";
+                    this.monsterConclusion.style.display = "block";
+                    this.pkConclusion.style.display = "none";
+                }
+            },
+            
+            // 更新输入框的值
+            updateInputValues() {
+                this.attackPowerInput.value = this.formatNumber(model.attackPower);
+                this.skillCoefficientInput.value = model.skillCoefficient;
+                this.totalRoundsInput.value = model.totalRounds;
+                this.enemyHPInput.value = this.formatNumber(model.enemyHP);
+                this.damageReductionInput.value = model.damageReduction;
+                this.patternSelect.value = model.selectedPattern;
+                this.customPatternInput.value = model.customPattern;
             },
             
             handleAttackPowerChange(e) {
@@ -625,6 +823,12 @@
             
             handleEnemyHPChange(e) {
                 model.enemyHP = this.parseNumber(e.target.value);
+                this.updateUI();
+                this.updateCharts();
+            },
+            
+            handleDamageReductionChange(e) {
+                model.damageReduction = parseFloat(e.target.value) || 50;
                 this.updateUI();
                 this.updateCharts();
             },
@@ -840,6 +1044,70 @@
                     }
                 });
                 
+                // 减伤系数影响图表（PK模式专用）
+                this.reductionChart = new Chart(this.reductionChartCanvas, {
+                    type: 'line',
+                    data: {
+                        datasets: [{
+                            label: '收益比',
+                            borderColor: '#f59e0b',
+                            backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                            borderWidth: 2,
+                            pointRadius: 0,
+                            pointHoverRadius: 4,
+                            tension: 0.3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const value = context.raw.benefitRatio.toFixed(3);
+                                        return `收益比: ${value}`;
+                                    },
+                                    title: function(context) {
+                                        const value = context[0].raw.reduction;
+                                        return `减伤系数: ${value}%`;
+                                    }
+                                }
+                            },
+                            annotation: {
+                                annotations: {
+                                    line1: {
+                                        type: 'line',
+                                        yMin: 1,
+                                        yMax: 1,
+                                        borderColor: 'red',
+                                        borderWidth: 1,
+                                        borderDash: [3, 3],
+                                        label: {
+                                            content: '临界值',
+                                            position: 'end'
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: '减伤系数(%)'
+                                }
+                            },
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: '火符/水符收益比'
+                                }
+                            }
+                        }
+                    }
+                });
+                
                 this.updateCharts();
             },
             
@@ -866,6 +1134,19 @@
                     attackK: item.attackK
                 }));
                 this.attackChart.update();
+                
+                // 如果是PK模式，更新减伤系数图表
+                if (model.gameMode === "pk") {
+                    const reductionData = model.generateReductionBasedData();
+                    this.reductionChart.data.labels = reductionData.map(item => item.reduction);
+                    this.reductionChart.data.datasets[0].data = reductionData.map(item => ({
+                        x: item.reduction,
+                        y: item.benefitRatio,
+                        benefitRatio: item.benefitRatio,
+                        reduction: item.reduction
+                    }));
+                    this.reductionChart.update();
+                }
             },
             
             // 辅助函数: 格式化数字
