@@ -668,7 +668,7 @@
             <div class="updated-info">更新: 战斗回合数现在会根据攻击力、暴击率和敌人血量自动计算</div>
             <div class="analysis-note">
                 回合数不再是手动输入的参数，而是根据您的攻击力、技能系数、暴击率、敌人血量和减伤等因素综合计算的结果。
-                这能更准确地反映战斗中的实际情况，并帮助您做出更合理的符咒搭配决策。
+                这能更准确地反映战斗中的实际情况，并帮助您做出更合理的五行符搭配决策。
             </div>
         </div>
         
@@ -684,7 +684,7 @@
                     </div>
                     
                     <div class="form-group">
-                        <label for="skillCoefficient">技能系数:</label>
+                        <label for="skillCoefficient">技能系数(非暴击):</label>
                         <input type="number" id="skillCoefficient" min="0.1" max="10" step="0.1" value="1.0">
                     </div>
                     
@@ -1181,7 +1181,7 @@
                 if (waterValue === 0) {
                     // 纯火符情况
                     if (halfHpPercentage <= 30) {
-                        return "推荐纯火符配置，您的高攻击力使敌人血量迅速降至半血，火符前期增伤效果能够最大化发挥。";
+                        return "推荐纯火符配置，你的高攻击力使敌人血量迅速降至半血，火符前期增伤效果能够最大化发挥。";
                     } else if (halfHpPercentage <= 60) {
                         return "推荐纯火符配置，在当前攻击力和敌人血量配比下，敌人半血前的增伤效果远超水符的再次释放收益。";
                     } else {
@@ -1190,7 +1190,7 @@
                 } else if (fireValue === 0) {
                     // 纯水符情况
                     if (halfHpPercentage <= 20) {
-                        return "推荐纯水符配置，您的高攻击力使敌人血量瞬间降至半血以下，水符的再次释放效果在整个战斗过程中更具持续价值。";
+                        return "推荐纯水符配置，你的高攻击力使敌人血量瞬间降至半血以下，水符的再次释放效果在整个战斗过程中更具持续价值。";
                     } else {
                         return "推荐纯水符配置，当前战斗环境下再次释放技能的持续收益超过了前期火符增伤，特别是在战斗预计持续" + expectedRounds + "回合的情况下。";
                     }
@@ -1199,7 +1199,7 @@
                     if (fireValue > waterValue) {
                         return `推荐前倾重火符配置(${fireValue}火${waterValue}水)，当前战斗环境中火符的前期增伤能在半血前(${halfHpRound}/${expectedRounds}回合)提供最大收益。`;
                     } else if (fireValue < waterValue) {
-                        return `推荐前倾重水符配置(${waterValue}水${fireValue}火)，您的输出能力和预期战斗回合(${expectedRounds}回合)下，这种配置在整场战斗中提供最平衡收益。`;
+                        return `推荐前倾重水符配置(${waterValue}水${fireValue}火)，你的输出能力和预期战斗回合(${expectedRounds}回合)下，这种配置在整场战斗中提供最平衡收益。`;
                     } else {
                         return `推荐平衡配置(${waterValue}水${fireValue}火)，此配置能在前期和后期都提供稳定收益，适合当前预期持续${expectedRounds}回合的战斗环境。`;
                     }
