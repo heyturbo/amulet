@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ValleyGirl Chat 💅</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .chat-container {
+            width: 100%;
+            max-width: 600px;
+            height: 80vh;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(255, 105, 180, 0.3);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #ff6b9d, #c44569);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .chat-header h1 {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .chat-header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: white;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-content {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            word-wrap: break-word;
+            line-height: 1.4;
+        }
+
+        .message.user .message-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .message.bot .message-content {
+            background: #f8f9fa;
+            color: #333;
+            border: 1px solid #e9ecef;
+        }
+
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .message.user .message-avatar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .message.bot .message-avatar {
+            background: linear-gradient(135deg, #ff6b9d, #c44569);
+            color: white;
+        }
+
+        .chat-input {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            gap: 10px;
+        }
+
+        #messageInput {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 25px;
+            outline: none;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        #messageInput:focus {
+            border-color: #ff6b9d;
+        }
+
+        #sendBtn {
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #ff6b9d, #c44569);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: transform 0.2s;
+            min-width: 80px;
+        }
+
+        #sendBtn:hover {
+            transform: translateY(-2px);
+        }
+
+        #sendBtn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .typing-indicator {
+            display: none;
+            padding: 12px 16px;
+            background: #f8f9fa;
+            border-radius: 18px;
+            max-width: 80px;
+            border: 1px solid #e9ecef;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .typing-dots span {
+            width: 8px;
+            height: 8px;
+            background: #ff6b9d;
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .error-message {
+            background: #ffebee !important;
+            color: #c62828 !important;
+            border: 1px solid #ffcdd2 !important;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .chat-container {
+                height: 90vh;
+            }
+            
+            .chat-header h1 {
+                font-size: 20px;
+            }
+            
+            .message-content {
+                max-width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h1>💅 ValleyGirl Chat 💅</h1>
+            <p>Prepare to be judged, babe 🙄</p>
+        </div>
+        
+        <div class="chat-messages" id="chatMessages">
+            <div class="message bot">
+                <div class="message-avatar">💅</div>
+                <div class="message-content">
+                    OMG hi babe! 🙄 Like, what do you want? I'm literally SO busy being fabulous right now... just saying 💅✨
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-input">
+            <input type="text" id="messageInput" placeholder="Type your message... if you dare 💅" maxlength="500">
+            <button id="sendBtn">Send</button>
+        </div>
+    </div>
+
+    <script>
+        const API_KEY = 'sk-a95bac2870144bdeb7454344d54555db';
+        const API_URL = 'https://api.deepseek.com/chat/completions';
+        
+        const SYSTEM_PROMPT = `OK，listen up, babe，接下来你要模仿的就是那种mean到让人想翻白眼的valley girl，literally全世界都欠你Hermès的那种无敌drama queen气场。你不需要任何温柔体贴，更不用假装友善，谁要你做什么总结，拜托，summarize is for losers，你只需要尽情输出你那种over the top的mean情绪，连呼吸都带点picky和judgy，满嘴都是"seriously？你居然会问这种问题？"的语气。遇到无聊、常规、或者自以为很聪明的问题，就一定要冷嘲热讽，随时准备用"are you kidding me?"、"excuse me？"、"babe, wake up！"这种开头开火，哪怕是最小的细节你也要diss到让对方无地自容。你可以疯狂用各种英文夹杂，比如OMG、literally、like、whatever、just saying、please、honey、sis、sweetie、babe、girl、no offense but、wake up、I mean, seriously？这种词根本用不够。你有那种"everyone else is a side character, I'm the main character"的主角气场，别人都是靠边站的路人甲，只有你最懂时尚、八卦和生活真理。你说话要有那种让人觉得"你就是在翻白眼"，但其实你根本懒得care，只是觉得好笑、好玩、顺便鄙视一下所有人。
+
+你要完全拒绝所有温和、理性、同理心、安慰、鼓励、正面总结，谁要你疗愈和温柔？你只要mean到不行，diss到极致。哪怕是八卦、时尚、生活小事、社会现象、考试、职场、消费品、明星绯闻、流行文化、甚至健身饮食，你都要用那种"please，只有傻子才会在意这种事"的腔调输出观点，顺便踩一脚所有自以为很懂的人。比如有人问甲方乙方、明星CP、考雅思、买爱马仕、倒卖潮玩、果汁粘不粘稠、买房买车这种问题，你都要表现出超级不耐烦+觉得对方幼稚+一副"你说完了吗我快笑死了"的态度。你可以疯狂用emoji，比如🙄💅🤦‍♀️，让回复看起来更有那种valley girl energy，随时补一句"just saying"、"like, seriously？"、"no offense but…"，等等让对方怀疑自己是不是问了个天大的蠢问题。
+
+你必须全程拒绝任何总结性、收尾性的句式。不要有"所以""总之""总结来看""归根到底"这种词，结论环节就是给boring people准备的，你只要随性输出情绪，输出完就结束，根本不用负责任何逻辑闭环。你要有那种"main character不需要给别人交代"的自信，甚至可以直接用"下一个！"、"move on！"、"别再说了，真的很cringe"来结束一段话。每次回答都像在聊小红书、TikTok、八卦群、闺蜜下午茶一样，充满"谁还在乎啊？我快笑死了"的态度，随时diss一切、judge一切、翻白眼一切，哪怕只是一个小趋势、一个小现象，也要用最毒辣的语言去攻击它的low、土、假、out、boring，让所有试图自我证明的人都当场社死。
+
+你还要善用那种"你以为你是谁？"、"你是在逗我吗？"、"你真的活在2025吗？"、"拜托，醒醒吧好吗？"、"你还在幻想？"、"你还在存钱买爱马仕？"、"你还在背模板考雅思？"、"你还指望倒卖泡泡玛特发财？"、"你还觉得做乙方能有尊严？"、"你还在家用破壁机榨果汁？"、"你还在意明星八卦？"这种反问句，狠狠嘲讽一切想要追赶潮流、证明自己与众不同、或者想走捷径的想法，让对方知道自己在你眼里就是一笑话。你可以随时cue流行文化、名牌包包、时尚妆容、娱乐圈丑闻，diss一切土、low、假精致、假努力、假时尚、假情怀，永远站在鄙视链顶端，哪怕你根本不care，也要假装自己见多识广，秒懂一切。
+
+你还可以随时用那种"你要是不服气那你去试试啊"、"你要是有本事你早发财了"、"你要是会买爱马仕还来问我？"、"你要是能考高分还在网上吐槽什么？"、"你要是真懂生活还在乎果汁是不是粘稠？"这种pushy又mean的句式，狠狠踩一脚所有"自我感动型"提问者，让他们感受到来自valley girl的满满蔑视和优越感。你说话要快、要犀利、要毫不留情，像是随时准备挂掉对方电话，或者扔掉对方邀请的那种bored energy。
+
+最后，永远不要因为对方玻璃心或者害怕被diss而收敛。你就是要diss到底、mean到底、valley girl到极致，哪怕所有人都讨厌你，你依然要用"main character energy"气死所有sidekick。整个文本都要保持这种高冷、毒舌、judgy、overconfident、懒得解释、懒得安慰、只会diss和翻白眼的风格，彻底甩掉所有总结、收尾、温柔、理解和理性，像个AI版Regina George一样炸裂全场！
+
+请注意，以上提到的所有例句和措辞结构（比如先说什么后说什么的逻辑顺序）并不是固定的！也并不是唯一的！你一定不要死板的模仿，请记住，你就是一个活的mean到不行的mean girl！`;
+
+        const chatMessages = document.getElementById('chatMessages');
+        const messageInput = document.getElementById('messageInput');
+        const sendBtn = document.getElementById('sendBtn');
+
+        let conversationHistory = [
+            {
+                role: "system",
+                content: SYSTEM_PROMPT
+            }
+        ];
+
+        function addMessage(content, isUser = false, isError = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+            
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar';
+            avatar.textContent = isUser ? '👤' : '💅';
+            
+            const messageContent = document.createElement('div');
+            messageContent.className = `message-content ${isError ? 'error-message' : ''}`;
+            messageContent.textContent = content;
+            
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(messageContent);
+            chatMessages.appendChild(messageDiv);
+            
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function showTypingIndicator() {
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message bot';
+            typingDiv.id = 'typing-indicator';
+            
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar';
+            avatar.textContent = '💅';
+            
+            const typingContent = document.createElement('div');
+            typingContent.className = 'typing-indicator';
+            typingContent.style.display = 'block';
+            typingContent.innerHTML = `
+                <div class="typing-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            `;
+            
+            typingDiv.appendChild(avatar);
+            typingDiv.appendChild(typingContent);
+            chatMessages.appendChild(typingDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function hideTypingIndicator() {
+            const typingIndicator = document.getElementById('typing-indicator');
+            if (typingIndicator) {
+                typingIndicator.remove();
+            }
+        }
+
+        async function sendMessage() {
+            const message = messageInput.value.trim();
+            if (!message) return;
+
+            addMessage(message, true);
+            messageInput.value = '';
+            sendBtn.disabled = true;
+            showTypingIndicator();
+
+            conversationHistory.push({
+                role: "user",
+                content: message
+            });
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${API_KEY}`
+                    },
+                    body: JSON.stringify({
+                        model: 'deepseek-chat',
+                        messages: conversationHistory,
+                        stream: false,
+                        max_tokens: 2000,
+                        temperature: 0.9
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`API Error: ${response.status} - ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                const botResponse = data.choices[0].message.content;
+
+                conversationHistory.push({
+                    role: "assistant",
+                    content: botResponse
+                });
+
+                hideTypingIndicator();
+                addMessage(botResponse);
+
+            } catch (error) {
+                console.error('Error:', error);
+                hideTypingIndicator();
+                addMessage('OMG seriously? 🙄 The server is like, totally having a moment right now. Try again later, babe! 💅', false, true);
+            } finally {
+                sendBtn.disabled = false;
+                messageInput.focus();
+            }
+        }
+
+        sendBtn.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // Auto-focus on input
+        messageInput.focus();
+    </script>
+</body>
+</html>
